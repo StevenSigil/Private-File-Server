@@ -1,0 +1,50 @@
+<div class="container">
+  <section class="section">
+    <h1>File Search</h1>
+  </section>
+
+  <section class="section">
+    <form [formGroup]="pathForm" (ngSubmit)="getFiles()">
+      <div class="formSection">
+        <div class="labelInput">
+          <label for="path"
+            >Please enter the path for the directory of movies</label
+          >
+          <input type="text" formControlName="path" id="path" />
+        </div>
+
+        <button type="submit" class="singleSubmitBtn">Save</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="section">
+    <!-- <div *ngFor="let message of messages | async" style="margin: 2rem auto">
+      <a> {{ message.message }} </a>
+    </div> -->
+
+    <div
+      *ngIf="directoryResult"
+      style="min-height: 50px; min-width: 50px; width: auto"
+    >
+      <p style="font-size: 1.1em">{{ directoryResult.directory }}</p>
+      <div style="float: left; width: 50%">
+        <h3>Files:</h3>
+        <div *ngFor="let file of directoryResult.files">
+          <p>{{ file }}</p>
+        </div>
+      </div>
+
+      <div style="float: right; width: 50%">
+        <h3>Folders:</h3>
+        <div *ngFor="let folder of directoryResult.folders">
+          <a (click)="getSubFolders(folder)">{{ folder }}</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- <button class="section" (click)="getFiles('C:/Users/Steve/Desktop')">
+      getFiles
+    </button> -->
+  </section>
+</div>

@@ -1,0 +1,50 @@
+h1 {
+  text-align: center;
+  margin: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2rem 0;
+
+  form {
+    width: 500px;
+    max-width: 100%;
+    min-width: 250px;
+
+    .formSection {
+      display: flex;
+      flex-direction: row;
+      border-top: 1px solid #ffffff;
+      border-left: 1px solid #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 0 10px 3px #eee;
+
+      button {
+        border-radius: 0 10px 10px 0;
+        margin: 0 0 0 auto;
+      }
+
+      .labelInput {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+
+        label {
+          margin: 1rem 0 1.25rem;
+          padding: 0 6px;
+          font-size: 1em;
+        }
+        input {
+          border: none;
+          border-radius: 10px 0 0 10px;
+          font-size: 1em;
+          padding: 0.5rem 1rem;
+          outline: none;
+        }
+      }
+    }
+  }
+}
