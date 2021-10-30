@@ -6,7 +6,8 @@ nav {
   min-height: 50px;
   background-color: rgb(114, 162, 207);
 
-  padding: 0.5rem 2.5rem 1rem;
+  padding-top: .5rem;
+  padding-bottom: 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -39,7 +40,6 @@ nav {
     }
 
     .separator {
-      color: rgb(151, 41, 60);
       width: 2px;
       background-color: rgb(151, 41, 60);
     }

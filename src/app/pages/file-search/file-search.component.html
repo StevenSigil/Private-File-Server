@@ -1,24 +1,126 @@
-<div class="container">
-  <section class="section">
-    <h1>File Search</h1>
+<div class="container-fluid">
+  <section class="container heading">
+    <h1 class="display-3">File Search</h1>
   </section>
 
-  <section class="section">
+  <section class="container-fluid fileSearchInputSection">
+    <div class="row">
+      <div class="col-5">
+        <form [formGroup]="pathForm" (ngSubmit)="getFiles()" class="container">
+          <div class="f1">
+            <div class="formDescriptionText">
+              <p>
+                Please enter the path for the directory of movies below, then
+                press "Search" or navigate to the directory by clicking the
+                appropriate links below.
+              </p>
+              <p>
+                When the selected path <em>(top-right section)</em> is correct,
+                press "Use Path"
+              </p>
+            </div>
+
+            <div class="inputOuter">
+              <input
+                type="text"
+                formControlName="path"
+                class="form-control"
+                id="path"
+                aria-describedby="pathHelp"
+                placeholder="paste a directory path here"
+              />
+              <div id="pathHelp" class="form-text">
+                Recommended: Paste a path from File Explorer here & then press
+                "Submit"
+              </div>
+            </div>
+          </div>
+
+          <div class="formBtnContainer">
+            <button type="submit" class="btn formBtn">Search</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-6 rightCol">
+        <div *ngIf="directoryResult && directoryResult.error" class="errorDiv">
+          <p>
+            {{ directoryResult.error }}
+          </p>
+        </div>
+
+        <div
+          *ngIf="directoryResult && !directoryResult.error"
+          class="rightMain"
+        >
+          <h3>Selected Path:</h3>
+          <h4 class="selection">{{ directoryResult.directory }}</h4>
+
+          <div class="statsSection container">
+            <!-- <h5>Selected Directory - Stats</h5> -->
+
+            <div class="statsInner row">
+              <div
+                class="col"
+                *ngFor="let title of objectKeys(directoryResult.stats)"
+              >
+                <div class="card">
+                  <div class="card-header">
+                    <h5>
+                      {{ normalizeText(title) }}
+                    </h5>
+                  </div>
+                  <div class="card-body">
+                    <div
+                      *ngFor="
+                        let count of directoryResult.stats[title.toString()]
+                      "
+                    >
+                      <div>
+                        <p class="card-text">{{ normalizeText(count.name) }}</p>
+                        <p class="card-text">
+                          {{ normalizeText(count.value.toString()) }}
+                        </p>
+                      </div>
+
+                      <span
+                        class="separator"
+                        *ngIf="
+                          count.name !=
+                          directoryResult.stats[title.toString()].at(-1).name
+                        "
+                      ></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- <section class="container fileSearchInputSection">
     <form [formGroup]="pathForm" (ngSubmit)="getFiles()">
       <div class="formSection">
         <div class="labelInput">
-          <label for="path"
-            >Please enter the path for the directory of movies</label
-          >
+          <label for="path">
+            <p>
+              Please enter the path for the directory of movies below or
+              navigate to the directory by clicking the appropriate links below.
+            </p>
+            <p>When the selected path is correct, press "Use Path"</p>
+          </label>
           <input type="text" formControlName="path" id="path" />
         </div>
 
-        <button type="submit" class="singleSubmitBtn">Save</button>
+        <button type="submit" class="singleSubmitBtn">Submit</button>
       </div>
     </form>
-  </section>
+  </section> -->
 
-  <section class="section">
+  <section class="container">
     <!-- <div *ngFor="let message of messages | async" style="margin: 2rem auto">
       <a> {{ message.message }} </a>
     </div> -->
@@ -27,18 +129,21 @@
       *ngIf="directoryResult"
       style="min-height: 50px; min-width: 50px; width: auto"
     >
-      <p style="font-size: 1.1em">{{ directoryResult.directory }}</p>
-      <div style="float: left; width: 50%">
-        <h3>Files:</h3>
-        <div *ngFor="let file of directoryResult.files">
-          <p>{{ file }}</p>
+      <div *ngIf="!directoryResult.error">
+        <div style="float: left; width: 50%">
+          <h3>Files:</h3>
+          <div *ngFor="let file of directoryResult.files">
+            <p>{{ file }}</p>
+          </div>
         </div>
-      </div>
 
-      <div style="float: right; width: 50%">
-        <h3>Folders:</h3>
-        <div *ngFor="let folder of directoryResult.folders">
-          <a (click)="getSubFolders(folder)">{{ folder }}</a>
+        <div style="float: right; width: 50%">
+          <h3>Folders:</h3>
+          <div *ngFor="let folder of directoryResult.folders">
+            <a (click)="getSubFolders(folder)">
+              {{ folder }}
+            </a>
+          </div>
         </div>
       </div>
     </div>

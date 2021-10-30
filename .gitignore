@@ -46,3 +46,4 @@ Thumbs.db
 
 # Private Files
 src/app/config
+server/python_scripts/venv

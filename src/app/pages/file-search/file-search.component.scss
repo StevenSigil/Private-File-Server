@@ -1,50 +1,159 @@
-h1 {
-  text-align: center;
-  margin: 0;
+@mixin blackCard {
+  border-radius: calc(0.25rem + 10px);
+  border: 1px solid #ffffff;
+  background-color: inherit;
+  box-shadow: 0px 0px 15px 5px #eeeeee;
 }
 
-.section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 2rem 0;
+.heading {
+  text-align: center;
+}
+
+.fileSearchInputSection {
+  margin-top: 2rem;
+
+  & > .row > .col-5 {
+    padding-right: 2rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
 
   form {
-    width: 500px;
-    max-width: 100%;
-    min-width: 250px;
+    @include blackCard();
+    padding: 0;
+    display: flex;
+    flex-direction: row;
 
-    .formSection {
-      display: flex;
-      flex-direction: row;
-      border-top: 1px solid #ffffff;
-      border-left: 1px solid #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 0 10px 3px #eee;
+    .f1 {
+      padding: 1rem 0 2rem;
 
-      button {
-        border-radius: 0 10px 10px 0;
-        margin: 0 0 0 auto;
+      .formDescriptionText {
+        margin: 1rem 1rem 0 2rem;
       }
-
-      .labelInput {
+      .inputOuter {
         display: flex;
         flex-direction: column;
-        flex: 1;
 
-        label {
-          margin: 1rem 0 1.25rem;
-          padding: 0 6px;
-          font-size: 1em;
-        }
         input {
-          border: none;
-          border-radius: 10px 0 0 10px;
-          font-size: 1em;
-          padding: 0.5rem 1rem;
-          outline: none;
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+          border-right: none;
+          margin-left: 1rem;
+          width: auto;
+        }
+        .form-text {
+          color: darken(#ffffff, 20%);
+          margin-right: 1rem;
+          margin-left: 2rem;
+        }
+      }
+    }
+
+    .formBtnContainer {
+      width: fit-content;
+      max-width: 150px;
+
+      .formBtn {
+        background-color: #ffffff;
+        width: 100%;
+        height: 100%;
+
+        font-weight: 500;
+        color: lighten(#000000, 30%);
+        text-decoration: underline solid 1px;
+        border-radius: calc(0.25rem + 8px);
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+    }
+  }
+
+  .rightCol {
+    .errorDiv {
+      color: red;
+    }
+
+    .rightMain {
+      .selection {
+        opacity: 0.7;
+      }
+
+      .statsSection {
+        margin-top: 2rem;
+        padding-left: 0;
+        padding-right: 0;
+      }
+      .card {
+        @include blackCard();
+        margin: 2rem 0;
+        width: max-content;
+        min-width: 250px;
+
+        .card-header {
+          display: flex;
+          flex-direction: row;
+          width: 100%;
+          justify-content: space-between;
+        }
+        .card-body {
+          display: flex;
+          flex-direction: row;
+
+          & > div {
+            display: flex;
+            flex-direction: row;
+
+            * {
+              margin: 0 0.25rem;
+            }
+          }
+
+          .separator {
+            min-width: 2px;
+            min-height: 100%;
+            background-color: rgb(151, 41, 60);
+          }
         }
       }
     }
   }
+
+  // form {
+  //   width: 500px;
+  //   max-width: 100%;
+  //   min-width: 250px;
+
+  //   .formSection {
+  //     display: flex;
+  //     flex-direction: row;
+  //     border-top: 1px solid #ffffff;
+  //     border-left: 1px solid #ffffff;
+  //     border-radius: 12px;
+  //     box-shadow: 0 0 10px 3px #eee;
+
+  //     button {
+  //       border-radius: 0 10px 10px 0;
+  //       margin: 0 0 0 auto;
+  //     }
+
+  //     .labelInput {
+  //       display: flex;
+  //       flex-direction: column;
+  //       flex: 1;
+
+  //       label {
+  //         margin: 1rem 0 1.25rem;
+  //         padding: 0 6px;
+  //         font-size: 1em;
+  //       }
+  //       input {
+  //         border: none;
+  //         border-radius: 10px 0 0 10px;
+  //         font-size: 1em;
+  //         padding: 0.5rem 1rem;
+  //         outline: none;
+  //       }
+  //     }
+  //   }
+  // }
 }

@@ -22,5 +22,6 @@ export class PathfinderService {
 
   getFiles2(path: string) {
     return this.http.get(directoryPath + `?path=${path}`);
+    // return this.http.get(`${Constants.API_ENDPOINT}/t?path=${path}`);
   }
 }

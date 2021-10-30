@@ -9,9 +9,8 @@ import { PathfinderService } from 'src/app/services/pathfinder.service';
   styleUrls: ['./file-search.component.scss'],
 })
 export class FileSearchComponent implements OnInit {
-  text!: string;
-  // messages: any;
-  directoryResult: any;
+  directoryResult: any | undefined;
+  objectKeys = Object.keys;
   // files: any;
   // path: any;
 
@@ -35,10 +34,12 @@ export class FileSearchComponent implements OnInit {
     this.pathfinderService
       .getFiles2(this.pathForm.value.path)
       .subscribe((res) => {
+        console.log(res);
         this.directoryResult = res;
       });
     this.pathForm.reset();
   }
+
   getSubFolders(folderName: string): void {
     const currPath = this.directoryResult.directory;
     const newPath = `${currPath}/${folderName}`;
@@ -46,10 +47,15 @@ export class FileSearchComponent implements OnInit {
     console.log('\n\nYour path has been submitted: ', newPath);
 
     this.pathfinderService.getFiles2(newPath).subscribe((res) => {
+      console.log(res);
       this.directoryResult = res;
     });
 
-    // this.pathForm.reset();
+    this.pathForm.reset();
+  }
+
+  normalizeText(text: string) {
+    return text[0].toUpperCase() + text.slice(1).toLowerCase();
   }
 
   // getFiles(newPath: string) {
