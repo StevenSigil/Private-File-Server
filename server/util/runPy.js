@@ -21,7 +21,7 @@ function runPy(scriptName, args) {
     });
 
     pyProg.stdout.on("end", () => {
-      success(JSON.parse(result));
+      success(result);
 
       if (resultError != "") {
         console.error(
@@ -30,8 +30,8 @@ function runPy(scriptName, args) {
           \n\tARGS: [${pyArgs.slice(1).join(", ")}]\n`
         );
         const error = new Error("\t" + JSON.parse(result).error);
-        // console.error(error);
-        // reject(resultError);
+        console.error(error);
+        reject(resultError);
       }
     });
   });

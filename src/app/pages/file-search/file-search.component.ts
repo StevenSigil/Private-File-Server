@@ -12,7 +12,7 @@ export class FileSearchComponent implements OnInit {
   directoryResult: any | undefined;
   objectKeys = Object.keys;
   // files: any;
-  // path: any;
+  // path!: string;
 
   pathForm = this.formBuilder.group({
     path: '',
@@ -30,13 +30,21 @@ export class FileSearchComponent implements OnInit {
   }
 
   getFiles(): void {
-    console.log('\n\nYour path has been submitted: ', this.pathForm.value.path);
-    this.pathfinderService
-      .getFiles2(this.pathForm.value.path)
-      .subscribe((res) => {
-        console.log(res);
-        this.directoryResult = res;
-      });
+    console.log(
+      '\n\nYour path has been submitted...\nInitial path: ',
+      this.pathForm.value.path
+    );
+
+    const origPath = this.pathForm.value.path;
+    var cleanedPath = String(origPath).trim();
+
+    // replace  \  or  \\  with  /  then remove trailing  /
+    cleanedPath = cleanedPath.replace(/\\{1,}/g, '/').replace(/\/+$/, '');
+
+    this.pathfinderService.getFiles2(cleanedPath).subscribe((res) => {
+      console.log(res);
+      this.directoryResult = res;
+    });
     this.pathForm.reset();
   }
 

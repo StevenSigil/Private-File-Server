@@ -1,8 +1,22 @@
+$color-green: rgba(50, 255, 50, 0.8);
+
 @mixin blackCard {
   border-radius: calc(0.25rem + 10px);
   border: 1px solid #ffffff;
   background-color: inherit;
   box-shadow: 0px 0px 15px 5px #eeeeee;
+}
+
+@mixin rightCardButton {
+  background-color: #ffffff;
+  width: 100%;
+  height: 100%;
+
+  font-weight: 500;
+  color: lighten(#000000, 30%);
+  border-radius: calc(0.25rem + 8px);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .heading {
@@ -54,68 +68,130 @@
       max-width: 150px;
 
       .formBtn {
-        background-color: #ffffff;
-        width: 100%;
-        height: 100%;
-
-        font-weight: 500;
-        color: lighten(#000000, 30%);
         text-decoration: underline solid 1px;
-        border-radius: calc(0.25rem + 8px);
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
+        @include rightCardButton();
       }
     }
   }
 
-  .rightCol {
-    .errorDiv {
-      color: red;
-    }
+  // dd {
+  //   text-align: end;
+  // }
 
+  .rightCol {
     .rightMain {
-      .selection {
-        opacity: 0.7;
+      flex-wrap: wrap;
+      min-height: 100%;
+
+      .middle {
+        padding: 0 4rem;
+
+        .blackCard {
+          padding-left: 1.5rem;
+          width: auto;
+          min-height: 100%;
+          flex-wrap: nowrap;
+          justify-content: space-between;
+          @include blackCard();
+
+          .left {
+            margin: 1rem 0 1rem;
+            width: max-content;
+          }
+
+          .formBtnContainer {
+            padding-right: 0;
+            width: fit-content;
+            max-width: 100px;
+
+            button {
+              @include rightCardButton();
+            }
+          }
+        }
+
+        .errorDiv > .left {
+          color: red;
+
+          h3 {
+            opacity: 0.6;
+          }
+        }
       }
 
       .statsSection {
-        margin-top: 2rem;
-        padding-left: 0;
-        padding-right: 0;
-      }
-      .card {
-        @include blackCard();
-        margin: 2rem 0;
-        width: max-content;
-        min-width: 250px;
+        margin-left: 4rem;
 
-        .card-header {
-          display: flex;
-          flex-direction: row;
-          width: 100%;
-          justify-content: space-between;
-        }
-        .card-body {
-          display: flex;
-          flex-direction: row;
+        .blackCard {
+          padding: 1rem 1.5rem;
+          min-height: 100%;
+          @include blackCard();
 
-          & > div {
-            display: flex;
-            flex-direction: row;
+          .head {
+            margin-bottom: 1rem;
 
-            * {
-              margin: 0 0.25rem;
+            h3 {
+              margin: 0;
             }
           }
-
-          .separator {
-            min-width: 2px;
-            min-height: 100%;
-            background-color: rgb(151, 41, 60);
+          .dataOuter {
+            > div {
+              margin-bottom: 1.5rem;
+              dt {
+                margin-bottom: 0.5rem;
+                border-bottom: 1px solid;
+              }
+              .list-unstyled {
+                margin: 0;
+                text-align: start;
+              }
+            }
           }
         }
       }
+      .selection {
+        color: $color-green;
+      }
     }
+
+    // .statsSection {
+    //   margin-top: 2rem;
+    //   padding-left: 0;
+    //   padding-right: 0;
+    //   flex-wrap: wrap;
+    // }
+    // .card {
+    //   @include blackCard();
+    //   margin: 2rem 0;
+    //   // width: max-content;
+    //   min-width: 250px;
+
+    //   .card-header {
+    //     display: flex;
+    //     flex-direction: row;
+    //     width: 100%;
+    //     justify-content: space-between;
+    //   }
+    //   .card-body {
+    //     // display: flex;
+    //     // flex-direction: row;
+
+    //     & > div {
+    //       display: flex;
+    //       flex-direction: row;
+
+    //       * {
+    //         margin: 0 0.25rem;
+    //       }
+    //     }
+
+    //     .separator {
+    //       min-width: 2px;
+    //       min-height: 100%;
+    //       background-color: rgb(151, 41, 60);
+    //     }
+    //   }
+    // }
   }
 
   // form {
