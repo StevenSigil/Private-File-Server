@@ -1,56 +1,38 @@
 const express = require("express");
-// const path = require("path");
-const PORT = 8080;
+const fs = require("fs");
+const path = require("path");
+
+const PORT = process.env.PORT || 3001;
 const app = express();
 
-let runPy = new Promise(function (success, noSuccess) {
-  const { spawn } = require("child_process");
-  const pProg = spawn("python", ["./../../main.py"]);
+app.use(
+  express.static(__dirname.replace(/(\\|\/)\w+$/, "/") + "dist/frontend")
+);
 
-  pProg.stdout.on("data"),
-    (data) => {
-      success(data);
-    };
-  pProg.stderr.on("data", (data) => {
-    noSuccess(data);
-  });
+app.get("/", (req, res) => {
+  console.log(__dirname.replace(/(\\|\/)\w+$/, "") + "dist/frontend");
+  res.sendFile("index.html");
 });
-
-app.use(express.static("../dist/frontend"));
-// app.set('view engin', 'pug');
-
-// app.get("/", (req, res) => {
-//   res.sendFile("index.html", { root: __dirname });
-// });
-
 app.get("/t", (req, res) => {
-  const { spawn } = require("child_process");
-  const pyProg = spawn("python", ["../mainModule.py"]);
-
-  res.send(
-    new Promise((resolve, reject) => {
-      pyProg.stdout.on("data", (data) => {
-        console.log(data.toString());
-        resolve(data.toString());
-      });
-      pyProg.stderr.on("data", reject);
-    })
+  // fs.readFile(__dirname)
+  // const curDir = __dirname;
+  var newDir = path.join(
+    // path.parse(curDir).root,
+    "C:/USERS/Steve/Desktop/css_test/JOJO_Rabbit.mp4"
   );
+
+  res.sendFile(newDir);
+
+  // fs.readdir(newDir, (err, files) => {
+  //   if (err) {
+  //     res.send(`<h1>${err}</h1>`);
+  //   }
+
+  //   var fileList = '';
+  //   files.forEach((file) => (fileList += `<h1>${file}</h1>`));
+  //   console.log('files: ', fileList);
+  //   res.send(fileList);
+  // });
 });
 
-// app.get("/t", (req, res) => {
-//   res.write("welcome\n");
-
-//   runPy
-//     .then(function (fromRunpy) {
-//       console.log(fromRunpy.toString());
-//       res.send(fromRunpy);
-//     })
-//     .catch((err) => {
-//       throw {err};
-//     });
-// });
-
-app.listen(80, () => {
-  console.log(`listening @ http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`listening @ http://localhost:${PORT}/`));

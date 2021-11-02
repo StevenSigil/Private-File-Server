@@ -21,17 +21,20 @@ function runPy(scriptName, args) {
     });
 
     pyProg.stdout.on("end", () => {
-      success(result);
-
       if (resultError != "") {
-        console.error(
-          `PYTHON ERROR (runPy.js: 26)! YOU CAN REPRODUCE THE ERROR WITH: \
-          \n\tCOMMAND: ${python}\n\tSCRIPT: ${script} \
-          \n\tARGS: [${pyArgs.slice(1).join(", ")}]\n`
-        );
-        const error = new Error("\t" + JSON.parse(result).error);
+        // console.error(
+        //   `PYTHON ERROR (runPy.js: 26)! YOU CAN REPRODUCE THE ERROR WITH: \
+        //   \n\tCOMMAND: ${python}\n\tSCRIPT: ${script} \
+        //   \n\tARGS: [${pyArgs.slice(1).join(", ")}]\n`
+        // );
+        const error = new Error("\t" + JSON.stringify(resultError));
         console.error(error);
-        reject(resultError);
+        const jsonErrorMessage = {
+          error: `ERROR RETRIEVING DIRECTORY FROM: "${args}" -- See terminal for details.`,
+        };
+        reject(jsonErrorMessage);
+      } else {
+        success(result);
       }
     });
   });

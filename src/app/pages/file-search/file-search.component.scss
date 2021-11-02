@@ -1,235 +1,294 @@
 $color-green: rgba(50, 255, 50, 0.8);
+$border-radius--card-btn: calc(0.25rem + 8px);
 
-@mixin blackCard {
+@mixin blackCard($bg-color: #ffffff) {
   border-radius: calc(0.25rem + 10px);
-  border: 1px solid #ffffff;
+  border: 1px solid $bg-color;
   background-color: inherit;
-  box-shadow: 0px 0px 15px 5px #eeeeee;
+  box-shadow: 0px 0px 15px 3px darken($bg-color, 10%);
 }
 
-@mixin rightCardButton {
+@mixin blackCardBtn() {
+  text-decoration: underline 1px solid;
   background-color: #ffffff;
   width: 100%;
   height: 100%;
-
   font-weight: 500;
   color: lighten(#000000, 30%);
-  border-radius: calc(0.25rem + 8px);
+}
+
+@mixin rightCardButton {
+  @include blackCardBtn();
+  border-radius: $border-radius--card-btn;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
 
-.heading {
-  text-align: center;
+@mixin sectionCol {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .fileSearchInputSection {
-  margin-top: 2rem;
+  margin: 100px auto;
 
-  & > .row > .col-5 {
-    padding-right: 2rem;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  form {
-    @include blackCard();
+  .row {
     padding: 0;
-    display: flex;
-    flex-direction: row;
 
-    .f1 {
-      padding: 1rem 0 2rem;
+    .leftCols {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
 
-      .formDescriptionText {
-        margin: 1rem 1rem 0 2rem;
-      }
-      .inputOuter {
-        display: flex;
-        flex-direction: column;
-
-        input {
-          border-top-right-radius: 0;
-          border-bottom-right-radius: 0;
-          border-right: none;
-          margin-left: 1rem;
-          width: auto;
-        }
-        .form-text {
-          color: darken(#ffffff, 20%);
-          margin-right: 1rem;
-          margin-left: 2rem;
-        }
-      }
-    }
-
-    .formBtnContainer {
-      width: fit-content;
-      max-width: 150px;
-
-      .formBtn {
-        text-decoration: underline solid 1px;
-        @include rightCardButton();
+      .heading {
+        text-align: center;
+        margin-bottom: 100px;
       }
     }
   }
 
-  // dd {
-  //   text-align: end;
-  // }
+  .formOuterCol {
+    @include sectionCol();
+    padding: 0 2rem;
 
-  .rightCol {
-    .rightMain {
-      flex-wrap: wrap;
+    form {
+      @include blackCard();
+      padding: 0;
+      display: flex;
+      flex-direction: row;
       min-height: 100%;
 
-      .middle {
-        padding: 0 4rem;
+      .f1 {
+        padding: 1rem 0 2rem;
 
-        .blackCard {
-          padding-left: 1.5rem;
-          width: auto;
-          min-height: 100%;
-          flex-wrap: nowrap;
-          justify-content: space-between;
-          @include blackCard();
-
-          .left {
-            margin: 1rem 0 1rem;
-            width: max-content;
-          }
-
-          .formBtnContainer {
-            padding-right: 0;
-            width: fit-content;
-            max-width: 100px;
-
-            button {
-              @include rightCardButton();
-            }
-          }
+        .formDescriptionText {
+          margin: 1rem 1rem 0 2rem;
         }
+        .inputOuter {
+          display: flex;
+          flex-direction: column;
 
-        .errorDiv > .left {
-          color: red;
-
-          h3 {
-            opacity: 0.6;
+          input {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: none;
+            margin-left: 1rem;
+            width: auto;
+          }
+          .form-text {
+            color: darken(#ffffff, 20%);
+            margin-right: 1rem;
+            margin-left: 2rem;
           }
         }
       }
 
-      .statsSection {
-        margin-left: 4rem;
+      .formBtnContainer {
+        width: fit-content;
+        max-width: 150px;
 
-        .blackCard {
-          padding: 1rem 1.5rem;
-          min-height: 100%;
-          @include blackCard();
-
-          .head {
-            margin-bottom: 1rem;
-
-            h3 {
-              margin: 0;
-            }
-          }
-          .dataOuter {
-            > div {
-              margin-bottom: 1.5rem;
-              dt {
-                margin-bottom: 0.5rem;
-                border-bottom: 1px solid;
-              }
-              .list-unstyled {
-                margin: 0;
-                text-align: start;
-              }
-            }
-          }
+        .formBtn {
+          @include rightCardButton();
         }
       }
-      .selection {
-        color: $color-green;
+    }
+  }
+
+  .selectedPathCol {
+    @include sectionCol();
+    padding: 0 2rem;
+
+    .blackCard {
+      @include blackCard();
+      margin: 0;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      min-height: 100%;
+
+      .leftText {
+        margin: 1rem 0;
+        padding: 1rem 2rem 2rem;
+
+        .selection {
+          margin-top: 3rem;
+          text-align: center;
+          color: $color-green;
+          word-break: break-all;
+        }
+      }
+
+      .formBtnContainer {
+        padding: 0;
+        max-height: 25%;
+        flex: 1;
+
+        button {
+          @include blackCardBtn();
+          border-radius: 0;
+          border-bottom-left-radius: $border-radius--card-btn;
+          border-bottom-right-radius: $border-radius--card-btn;
+        }
       }
     }
 
-    // .statsSection {
-    //   margin-top: 2rem;
-    //   padding-left: 0;
-    //   padding-right: 0;
-    //   flex-wrap: wrap;
-    // }
-    // .card {
-    //   @include blackCard();
-    //   margin: 2rem 0;
-    //   // width: max-content;
-    //   min-width: 250px;
+    .errorDiv > .leftText {
+      color: red;
 
-    //   .card-header {
-    //     display: flex;
-    //     flex-direction: row;
-    //     width: 100%;
-    //     justify-content: space-between;
-    //   }
-    //   .card-body {
-    //     // display: flex;
-    //     // flex-direction: row;
-
-    //     & > div {
-    //       display: flex;
-    //       flex-direction: row;
-
-    //       * {
-    //         margin: 0 0.25rem;
-    //       }
-    //     }
-
-    //     .separator {
-    //       min-width: 2px;
-    //       min-height: 100%;
-    //       background-color: rgb(151, 41, 60);
-    //     }
-    //   }
-    // }
+      h3 {
+        opacity: 0.6;
+      }
+    }
   }
 
-  // form {
-  //   width: 500px;
-  //   max-width: 100%;
-  //   min-width: 250px;
+  .statsCol {
+    @include sectionCol();
+    padding: 0 2rem;
 
-  //   .formSection {
-  //     display: flex;
-  //     flex-direction: row;
-  //     border-top: 1px solid #ffffff;
-  //     border-left: 1px solid #ffffff;
-  //     border-radius: 12px;
-  //     box-shadow: 0 0 10px 3px #eee;
+    .blackCard {
+      padding: 1rem 1.5rem;
+      @include blackCard();
+      margin: 0;
+      max-width: 100%;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
 
-  //     button {
-  //       border-radius: 0 10px 10px 0;
-  //       margin: 0 0 0 auto;
-  //     }
+      .head {
+        margin-bottom: 1rem;
 
-  //     .labelInput {
-  //       display: flex;
-  //       flex-direction: column;
-  //       flex: 1;
+        h3 {
+          margin: 0;
+        }
+      }
+      .dataOuter {
+        > div {
+          margin-bottom: 1.5rem;
+          dt {
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid;
+          }
+          .list-unstyled {
+            margin: 0;
+            text-align: start;
+          }
+        }
+      }
+    }
+  }
+}
 
-  //       label {
-  //         margin: 1rem 0 1.25rem;
-  //         padding: 0 6px;
-  //         font-size: 1em;
-  //       }
-  //       input {
-  //         border: none;
-  //         border-radius: 10px 0 0 10px;
-  //         font-size: 1em;
-  //         padding: 0.5rem 1rem;
-  //         outline: none;
-  //       }
-  //     }
-  //   }
-  // }
+.filesNFoldersSection {
+  display: flex;
+  flex-direction: row;
+  margin: 150px auto;
+
+  .fileFolderCol {
+    display: flex;
+    flex-direction: column;
+
+    .colInner {
+      @include blackCard($color-green);
+      width: calc(100% - 4rem);
+      margin: 0 auto;
+      padding: 1.5rem 2rem 2rem;
+
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
+    }
+
+    .head {
+      margin-bottom: 2rem;
+    }
+
+    .textOuter {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .ddOuter {
+      margin-bottom: 0.75rem;
+      border-bottom: 1px dotted;
+      flex-wrap: nowrap;
+
+      dd {
+        margin-bottom: 0.25rem;
+        padding: 0 10px;
+      }
+
+      .fileName {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        width: calc(100% - 50px - 20px);
+      }
+
+      .extension {
+        min-width: 50px;
+        text-align: end;
+      }
+    }
+
+    .folderSubhead {
+      flex-direction: column;
+      margin-bottom: 2rem;
+
+      small {
+        width: 100%;
+        margin: 0;
+      }
+    }
+
+    .folderOuter {
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      margin: 0;
+      align-items: baseline;
+      width: 100%;
+      max-height: 100%;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+
+      button {
+        @include blackCard();
+        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+        padding: 0.5rem 1.25rem;
+        margin: 0 2rem 1.5rem;
+        min-width: fit-content;
+        border-radius: 6px;
+        color: inherit;
+      }
+    }
+  }
+}
+/* width */
+::-webkit-scrollbar {
+  height: auto;
+  border-radius: 6px;
+  border-top: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+}
+
+// /* Track */
+::-webkit-scrollbar-track {
+  background: inherit;
+}
+
+// /* Handle */
+::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #ffffff;
+  background: transparentize($color: #ffffff, $amount: 0.8);
 }

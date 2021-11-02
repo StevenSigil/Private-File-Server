@@ -9,6 +9,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { FileSearchComponent } from './pages/file-search/file-search.component';
 import { HomeComponent } from './pages/home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { VideoPlayerComponent } from './pages/video-player/video-player.component';
 
 @NgModule({
   declarations: [
@@ -16,6 +17,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     HeaderComponent,
     FileSearchComponent,
     HomeComponent,
+    VideoPlayerComponent,
   ],
    imports: [
     BrowserModule,

@@ -1,13 +1,11 @@
 const express = require("express");
-const { spawn } = require("child_process");
+const path = require("path");
+const fs = require("fs");
 
 const pyRunner = require("./util/runPy");
 
 const app = express();
 const port = 3000;
-
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -17,50 +15,70 @@ app.use((req, res, next) => {
   );
   next();
 });
+app.use(express.static(path.join(__dirname, "/../dist/frontend")));
+app.use(express.urlencoded({ extended: false }));
+// app.use(express.json());
 
-app
-  .route("/api/directory")
-  .get((req, res) => {
-    console.log("\n====================================");
-    console.log('NEW REQUEST TO: "/api/directory"');
+app.get("/", (req, res) => {
+  res.sendFile("index.html");
+});
 
-    const query = req.query ? req.query.path : undefined;
-    console.log(`QUERY: ${query}`);
+app.route("/api/directory").get((req, res) => {
+  console.log("\n====================================");
+  console.log('NEW REQUEST TO: "/api/directory"', req.query);
 
-    if (query) {
-      pyRunner
-        .runPy("main.py", query)
-        .then((result) => {
-          // console.log(result);
-          res.send(result);
-        })
-        .catch((err) => {
-          res.status(400).send(err);
-        });
-    }
-  })
-  .post((req, res) => {
-    // expecting {body: {data: {path: String}}}
-    const reqPath = req.body.data.path;
-    console.log(reqPath);
+  const query = req.query ? req.query.path : undefined;
+  console.log(`QUERY: ${query}`);
 
-    var dataToSend;
-    // spawn new child process to call the python script
-    const python = spawn("python", ["../../main.py", reqPath]);
+  if (query) {
+    pyRunner
+      .runPy("main.py", query)
+      .then((result) => {
+        // console.log(result);
+        res.send(result);
+      })
+      .catch((err) => {
+        res.status(404).send(err);
+      });
+  }
+});
 
-    // collect data from script
-    python.stdout.on("data", function (data) {
-      console.log("Pipe data from python script ...");
-      dataToSend = data.toString();
-    });
+var currViewingVideoPath = "";
 
-    // in close event we are sure that stream from child process is closed
-    python.on("close", (code) => {
-      console.log(`child process close all stdio with code ${code}`);
-      res.send(dataToSend);
-    });
+app.route("/api/file-finder").get((req, res) => {
+  console.log("\n====================================");
+  console.log('NEW REQUEST TO: "/api/file-finder"', req.query);
+
+  const defaultPath = "C:/USERS/Steve/Desktop/css_test/JOJO_Rabbit.mp4";
+  var pathQuery = req.query.path || null;
+
+  if (req.query && pathQuery) {
+    currViewingVideoPath = pathQuery;
+  }
+
+  if (currViewingVideoPath !== "") {
+    pathQuery = currViewingVideoPath;
+  } else {
+    pathQuery = defaultPath;
+  }
+
+  console.log("query: ", req.query.path || null);
+  console.log("currViewingVideoPath: ", currViewingVideoPath);
+  console.log("defaultPath: ", defaultPath);
+  console.log("pathQuery: ", pathQuery);
+  fs.stat(pathQuery, (err, stats) =>
+    console.log("pathQuery SIZE: ", stats.size)
+  );
+
+  res.sendFile(pathQuery, (err) => {
+    console.log("error: ", err);
   });
+  // res.on("close", () => (currViewingVideoPath = ""));
+});
 
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
+// ======================================================================================
 // app.get("/api/directory", async (req, res) => {
 //   console.log("\n====================================");
 //   console.log('NEW REQUEST TO: "/api/t"');
@@ -129,10 +147,3 @@ app
 //     res.send(dataToSend);
 //   });
 // });
-
-// app.use(express.static("../dist/frontend"));
-// app.get("/", (req, res) => {
-//   res.sendFile("index.html", { root: __dirname });
-// });
-
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));

@@ -1,72 +1,69 @@
 <div class="container-fluid">
-  <section class="container heading">
-    <h1 class="display-3">File Search</h1>
-  </section>
+  <!-- <section class="container "></section> -->
 
   <section class="container-fluid fileSearchInputSection">
     <div class="row">
-      <div class="col-5">
-        <form [formGroup]="pathForm" (ngSubmit)="getFiles()" class="container">
-          <div class="f1">
-            <div class="formDescriptionText">
-              <p>
-                Please enter the path for the directory of movies below, then
-                press "Search" or navigate to the directory by clicking the
-                appropriate links below.
-              </p>
-              <p>
-                When the selected path <em>(in the middle)</em> is correct,
-                press "Use This Path"
-              </p>
-            </div>
-
-            <div class="inputOuter">
-              <input
-                type="text"
-                formControlName="path"
-                class="form-control"
-                id="path"
-                aria-describedby="pathHelp"
-                placeholder="paste a directory path here"
-              />
-              <div id="pathHelp" class="form-text">
-                Recommended: Paste a path from File Explorer here & then press
-                "Submit"
-              </div>
-            </div>
-          </div>
-
-          <div class="formBtnContainer">
-            <button type="submit" class="btn formBtn">Search</button>
-          </div>
-        </form>
-      </div>
-
-      <!-- ========================================================= -->
-      <!-- ==================== RIGHT TWO COLS ===================== -->
-      <div class="col-7 rightCol">
-        <div *ngIf="directoryResult" class="rightMain row">
-          <!-- =============================== -->
-          <!-- ============ Middle =========== -->
-          <div class="col-7 middle">
-            <!-- =============================== -->
-            <!-- ============ ERROR ============ -->
-            <div
-              *ngIf="directoryResult && directoryResult.error"
-              class="errorDiv blackCard"
+      <div class="col-9 leftCols">
+        <h1 class="display-3 heading">File Search</h1>
+        <div class="row">
+          <!-- ========================================================= -->
+          <!-- ====================== LEFT COLUMN ====================== -->
+          <div class="formOuterCol col">
+            <form
+              id="fileDirForm"
+              [formGroup]="pathForm"
+              (ngSubmit)="getFiles()"
+              class="container"
             >
-              <div class="left">
-                <h3>Ah Sh*t ...</h3>
-                <p>
-                  {{ directoryResult.error }}
-                </p>
-              </div>
-            </div>
+              <div class="f1">
+                <div class="formDescriptionText">
+                  <p>
+                    Please enter the path for the directory of movies below,
+                    then press "Search" or navigate to the directory by clicking
+                    the appropriate links below.
+                  </p>
+                  <p>
+                    When the selected path
+                    <em>(in the middle)</em> is correct, press "Use This Path"
+                  </p>
+                </div>
 
-            <div class="blackCard row" *ngIf="!directoryResult.error">
-              <div class="left">
+                <div class="inputOuter">
+                  <input
+                    type="text"
+                    formControlName="path"
+                    class="form-control"
+                    id="path"
+                    aria-describedby="pathHelp"
+                    placeholder="paste a directory path here"
+                  />
+                  <div id="pathHelp" class="form-text">
+                    Recommended: Paste a path from File Explorer here & then
+                    press "Submit"
+                  </div>
+                </div>
+              </div>
+
+              <div class="formBtnContainer">
+                <button type="submit" class="btn formBtn">Search</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- ========================================================= -->
+          <!-- ==================== MIDDLE COLUMN ====================== -->
+          <div class="col-5 selectedPathCol">
+            <div
+              id="selectedPathCard"
+              class="row blackCard"
+              *ngIf="directoryResult && !directoryResult['error']"
+            >
+              <!-- || !directoryResult.error -->
+              <div class="leftText">
                 <h3>Selected Path:</h3>
-                <h4 class="selection">{{ directoryResult.directory }}</h4>
+                <h4 class="selection">
+                  {{ directoryResult.directory }}
+                </h4>
               </div>
 
               <div class="formBtnContainer">
@@ -74,47 +71,68 @@
                 <!-- TODO: This btn -->
               </div>
             </div>
+
+            <!-- ============ ERROR ============ -->
+            <div
+              *ngIf="directoryResult && directoryResult.error"
+              class="errorDiv blackCard"
+            >
+              <div class="leftText">
+                <h3>Ah Sh*t ...</h3>
+                <p>
+                  {{ directoryResult.error }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- ==================== RIGHT COLUMN ======================= -->
+      <div
+        class="col-3 statsCol"
+        *ngIf="directoryResult && !directoryResult.error"
+      >
+        <div class="blackCard row">
+          <div class="head">
+            <h3>Stats</h3>
           </div>
 
-          <!-- =============================== -->
-          <!-- ============ Stats ============ -->
-          <div class="col statsSection" *ngIf="!directoryResult.error">
-            <div class="blackCard row">
-              <div class="head">
-                <h3>Stats</h3>
-              </div>
+          <div class="dataOuter">
+            <div *ngFor="let title of objectKeys(directoryResult.stats)">
+              <dl>
+                <dt *ngIf="title != 'file types'">
+                  {{ normalizeText(title) }}
+                </dt>
+                <dt *ngIf="title == 'file types'" style="border: none">
+                  {{ normalizeText(title) }}
+                </dt>
 
-              <div class="dataOuter">
-                <div *ngFor="let title of objectKeys(directoryResult.stats)">
-                  <dl>
-                    <dt *ngIf="title != 'file types'">
-                      {{ normalizeText(title) }}
-                    </dt>
-                    <dt *ngIf="title == 'file types'" style="border: none;">
-                      {{normalizeText(title)}}
-                    </dt>
+                <ul
+                  class="list-unstyled row"
+                  *ngFor="let stat of directoryResult.stats[title.toString()]"
+                >
+                  <div *ngIf="stat.type && stat.type == 'base'" class="row">
+                    <li class="left col">{{ stat.name }} :</li>
+                    <li class="right col">
+                      {{ stat.value }}
+                    </li>
+                  </div>
+                  <div
+                    *ngIf="stat.type && stat.type == 'file_type'"
+                    class="row"
+                  >
+                    <li class="left col">
+                      {{ stat.name }}
+                    </li>
 
-                    <ul
-                      class="list-unstyled row"
-                      *ngFor="
-                        let stat of directoryResult.stats[title.toString()]
-                      "
-                    >
-                      <div *ngIf="stat.type && stat.type == 'base'" class="row">
-                        <li class="left col">{{ stat.name }} :</li>
-                        <li class="right col">{{ stat.value }}</li>
-                      </div>
-                      <div
-                        *ngIf="stat.type && stat.type == 'file_type'"
-                        class="row"
-                      >
-                        <li class="left col">{{ stat.name }}</li>
-                        <li class="right col">{{ stat.value }}</li>
-                      </div>
-                    </ul>
-                  </dl>
-                </div>
-              </div>
+                    <li class="right col">
+                      {{ stat.value }}
+                    </li>
+                  </div>
+                </ul>
+              </dl>
             </div>
           </div>
         </div>
@@ -122,119 +140,52 @@
     </div>
   </section>
 
-  <!-- <div class="statsInner row">
-              <div class="col-5">
-                <div class="card">
-                  <div class="card-header">
-                    <h5>Stats</h5>
-                  </div>
+  <!-- ========================================================= -->
+  <!-- =============== ROW 2 - FILES & FOLDERS ================= -->
+  <section
+    *ngIf="directoryResult && !directoryResult.error"
+    class="filesNFoldersSection container-fluid"
+  >
+    <div class="fileFolderCol col-4">
+      <div class="colInner">
+        <h3 class="head">Files</h3>
+        <dl>
+          <div class="textOuter">
+            <dt>file name</dt>
+            <dt>file types</dt>
+          </div>
 
-                  <div class="card-body">
-                    <div
-                      *ngFor="let title of objectKeys(directoryResult.stats)"
-                    >
-                      <dl>
-                        <dt>
-                          {{ normalizeText(title) }}
-                        </dt>
-                        <dl
-                          class="row"
-                          *ngFor="
-                            let stat of directoryResult.stats[title.toString()]
-                          "
-                        >
-                          <dt class="col">{{ stat.name }}:</dt>
-                          <dd class="col">{{ stat.value }}</dd>
-                        </dl>
-                      </dl>
-                    </div>
-                  </div>
-                </div>
-              </div> -->
-
-  <!-- <div class="col-2"></div>
-
-              <div class="col">
-                <div class="card">
-                  <div *ngFor="let title of objectKeys(directoryResult.stats)">
-                    <div class="card-header">
-                      <h5>
-                        {{ normalizeText(title) }}
-                      </h5>
-                    </div>
-                    <div class="card-body">
-                      <div
-                        *ngFor="
-                          let count of directoryResult.stats[title.toString()]
-                        "
-                      >
-                        <div>
-                          <p class="card-text">
-                            {{ normalizeText(count.name) }}
-                          </p>
-                          <p class="card-text">
-                            {{ normalizeText(count.value.toString()) }}
-                          </p>
-                        </div>
-
-                        <span
-                          class="separator"
-                          *ngIf="
-                            count.name !=
-                            directoryResult.stats[title.toString()].at(-1).name
-                          "
-                        ></span>
-                      </div>
-                    </div>
-                    <div class="card-footer"></div>
-                  </div>
-                </div> 
-              </div> 
-            </div> -->
-
-  <!-- <section class="container fileSearchInputSection">
-    <form [formGroup]="pathForm" (ngSubmit)="getFiles()">
-      <div class="formSection">
-        <div class="labelInput">
-          <label for="path">
-            <p>
-              Please enter the path for the directory of movies below or
-              navigate to the directory by clicking the appropriate links below.
-            </p>
-            <p>When the selected path is correct, press "Use Path"</p>
-          </label>
-          <input type="text" formControlName="path" id="path" />
-        </div>
-
-        <button type="submit" class="singleSubmitBtn">Submit</button>
+          <div
+            *ngFor="let file of directoryResult.files"
+            style="display: contents"
+          >
+            <div
+              *ngIf="removeFileExtension(file) && getFileExtension(file)"
+              class="textOuter ddOuter"
+            >
+              <dd class="fileName">{{ removeFileExtension(file) }}</dd>
+              <dd class="extension">{{ getFileExtension(file) }}</dd>
+            </div>
+          </div>
+        </dl>
       </div>
-    </form>
-  </section> -->
+    </div>
 
-  <section class="container">
-    <!-- <div *ngFor="let message of messages | async" style="margin: 2rem auto">
-      <a> {{ message.message }} </a>
-    </div> -->
+    <div class="fileFolderCol col">
+      <div class="colInner">
+        <h3 class="head">Folders</h3>
+        <dl class="textOuter folderSubhead">
+          <dt>Folder Name</dt>
+          <small>(Click a folder to set the path to that folder)</small>
+        </dl>
 
-    <div
-      *ngIf="directoryResult"
-      style="min-height: 50px; min-width: 50px; width: auto"
-    >
-      <div *ngIf="!directoryResult.error">
-        <div style="float: left; width: 50%">
-          <h3>Files:</h3>
-          <div *ngFor="let file of directoryResult.files">
-            <p>{{ file }}</p>
-          </div>
-        </div>
-
-        <div style="float: right; width: 50%">
-          <h3>Folders:</h3>
-          <div *ngFor="let folder of directoryResult.folders">
-            <a (click)="getSubFolders(folder)">
-              {{ folder }}
-            </a>
-          </div>
+        <div class="folderOuter">
+          <button
+            (click)="getSubFolders(folder)"
+            *ngFor="let folder of directoryResult.folders"
+          >
+            {{ folder }}
+          </button>
         </div>
       </div>
     </div>

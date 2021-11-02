@@ -6,34 +6,33 @@ import json
 
 def get_directory(dir_path="C:/Users/Steve/Desktop"):
     try:
-        filenames = next(os.walk(dir_path))  # [directory, [folders], [files]]
+        directory, folders, files = next(os.walk(dir_path, topdown=True))
 
         stats = dict()
         stats['counts'] = [
-            {"name": "files", "value": len(filenames[2]), 'type': 'base'},
-            {"name": "folders", "value": len(filenames[1]), 'type': 'base'},
-        ]
+            {"name": "files", "value": len(files), 'type': 'base'},
+            {"name": "folders", "value": len(folders), 'type': 'base'},
+            ]
 
         # get file types and add to stats.counts
-        file_types = get_file_extensions_and_counts(filenames[2])
+        file_types = get_file_extensions_and_counts(files)
         stats['file types'] = file_types
-        # for ft in file_types:
-        #     ft = dict(ft)
-        #     # print(ft)
-        #     stats['file types'] = ft
 
-    except:
-        return_err = {
-            "error": 'ERROR RETRIEVING DIRECTORY FROM: "' + dir_path + '"'}
-        print(json.dumps(return_err))
+    except StopIteration:
+        def handle_err(err):
+            # return err
+            raise Exception(err) from None
+
+        handle_err(f'CAN NOT FIND INFORMATION FROM DIRECTORY: {dir_path}')
+        return
 
     # Parse into readable dict.
     return_obj = {
-        "directory": filenames[0],
-        "folders": filenames[1],
-        "files": filenames[2],
+        "directory": directory,
+        "folders": folders,
+        "files": files,
         "stats": stats,
-    }
+        }
 
     # Encode to JSON
     encoded_string = json.dumps(return_obj)
@@ -62,7 +61,7 @@ def get_file_extensions_and_counts(filenames: list):
             else:
                 filetypes[ext] = 1
 
-        except:
+        except StopIteration:
             pass
 
     ret_list = name_value_dict(filetypes, 'file_type')
@@ -74,6 +73,7 @@ def name_value_dict(d: dict, t: str = None):
     "name" and values mapped to value of "value"
 
     :param d: the dictionary who's key and value will be mapped to values of "name" and "value" respectively
+    :param t: adds key "type" with value t to the returning dictionary
     :return: List of dictionaries with keys: "name" & "value"
     """
     return_list = []
@@ -89,10 +89,7 @@ def name_value_dict(d: dict, t: str = None):
 
 
 if __name__ == "__main__":
-    try:
-        dirArg = sys.argv[1]
-        print(get_directory(dirArg))
+    dirArg = sys.argv[1]
+    print(get_directory(dirArg))
 
-        # print(get_directory("C:/USERS/Steve"))
-    except Exception:
-        raise Exception("\nERROR WHILE LOADING ARGUMENT\n")
+    # print(get_directory("D:/USERS/Steve"))
