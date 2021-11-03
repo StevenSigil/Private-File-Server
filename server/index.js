@@ -1,13 +1,9 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
-const util = require("util");
-
-const readDir = util.promisify(fs.readdir);
-const lStat = util.promisify(fs.lstat);
 
 const pyRunner = require("./util/runPy");
-const { kill } = require("process");
+const { getDirectoryContent, logRequest } = require("./util/middleware");
 const app = express();
 const PORT = 3000;
 
@@ -27,96 +23,24 @@ app.route("/").get((req, res) => {
   res.sendFile("index.html");
 });
 
-app.route("/api/directory2").get(getDirectoryContent, (req, res) => {
-  console.log("\n====================================");
-  console.log('NEW REQUEST TO: "/api/directory2"', req.query);
-
-  // console.log("directory_content:\t", res.directory_content);
-
-  res.json(res.directory_content);
-});
-
-/**
- * @description Middleware function to get directory from a given path provided in request query "path" params
- *
- * @returns {Response}  Response.locals.filenames: string[]
- */
-async function getDirectoryContent(req, res, next) {
-  const query = req.query && req.query.path ? req.query.path : "C:/Users";
-
-  try {
-    const dirContent = await readDir(path.join(query));
-    const files = [];
-    const folders = [];
-    const fileTypes = {};
-    const ret = {};
-
-    for (let name of dirContent) {
-      const stats = await lStat(path.join(path.resolve(query), name));
-
-      if (stats.isFile()) {
-        files.push(name);
-
-        const ext = path.extname(path.join(query, name));
-
-        if (ext !== "") {
-          fileTypes[ext] = fileTypes[ext] + 1 || 1;
-        }
-        //
-      } else {
-        folders.push(name);
-      }
+app
+  .route("/api/directory2")
+  .get(logRequest, getDirectoryContent, (req, res) => {
+    if (res.directory_content && !res.directory_content.errno) {
+      res.json(res.directory_content);
+    } else {
+      const { code, syscall, path } = res.directory_content;
+      const jsonError = {
+        error: `ERROR RETRIEVING DIRECTORY!\tSee terminal for details.`,
+        code,
+        syscall,
+        path,
+      };
+      res.status(400).send(jsonError);
     }
+  });
 
-    ret.directory = query;
-    ret.files = files;
-    ret.folders = folders;
-    ret.stats = {
-      counts: [
-        { name: "files", value: files.length, type: "base" },
-        {
-          name: "folders",
-          value: folders.length,
-          type: "base",
-        },
-      ],
-      fileTypes: nameValueObj(fileTypes, "file_type"),
-    };
-
-    res.directory_content = ret;
-    next();
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-function nameValueObj(d = Object, t = String) {
-  returnList = [];
-
-  for (let k of Object.keys(d)) {
-    tempObj = { name: k, value: d[k] };
-
-    if (t) tempObj.type = t;
-
-    returnList.push(tempObj);
-  }
-  return returnList;
-}
-
-// function checkIfFile(fp) {
-//   fs.lstat(fp, (err, stats) => {
-//     if (err) return console.log(err);
-
-//     const pathIsFile = stats.isFile();
-//     console.log("Is file:\t", pathIsFile, fp);
-//     return pathIsFile;
-//   });
-// }
-
-app.route("/api/directory").get((req, res) => {
-  console.log("\n====================================");
-  console.log('NEW REQUEST TO: "/api/directory"', req.query);
-
+app.route("/api/directory").get(logRequest, (req, res) => {
   const query = req.query ? req.query.path : undefined;
   console.log(`QUERY: ${query}`);
 
@@ -135,7 +59,7 @@ app.route("/api/directory").get((req, res) => {
 var currViewingVideoPath = "";
 const sampleVideo = "C:/Users/Steve/Desktop/css_test/Shaun of the Dead.mp4";
 
-app.route("/api/file-finder").get(async (req, res) => {
+app.route("/api/video").get(async (req, res) => {
   try {
     console.log("\n====================================");
     console.log('NEW REQUEST TO: "/api/t"', req.query);

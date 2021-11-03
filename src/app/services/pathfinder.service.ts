@@ -18,7 +18,7 @@ const httpOpts = {
 };
 
 export const directoryPath = `${Constants.API_ENDPOINT}/directory`;
-export const videoFilePath = `${Constants.API_ENDPOINT}/file-finder`;
+export const videoFilePath = `${Constants.API_ENDPOINT}/video`;
 
 @Injectable({
   providedIn: 'root',

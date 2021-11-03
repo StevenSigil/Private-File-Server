@@ -1,6 +1,4 @@
 <div class="container-fluid">
-  <!-- <section class="container "></section> -->
-
   <section class="container-fluid fileSearchInputSection">
     <div class="row">
       <div class="col-9 leftCols">
@@ -58,7 +56,6 @@
               class="row blackCard"
               *ngIf="directoryResult && !directoryResult['error']"
             >
-              <!-- || !directoryResult.error -->
               <div class="leftText">
                 <h3>Selected Path:</h3>
                 <div class="selection">
@@ -67,9 +64,6 @@
                     >/
                   </h4>
                 </div>
-                <!-- <h4 class="selection">
-                  {{ directoryResult.directory }}
-                </h4> -->
               </div>
 
               <div class="formBtnContainer">
@@ -108,11 +102,8 @@
           <div class="dataOuter">
             <div *ngFor="let title of objectKeys(directoryResult.stats)">
               <dl>
-                <dt *ngIf="title != 'file types'">
-                  {{ normalizeText(title) }}
-                </dt>
-                <dt *ngIf="title == 'file types'" style="border: none">
-                  {{ normalizeText(title) }}
+                <dt>
+                  {{ normalizeFromCamel(title) }}
                 </dt>
 
                 <ul
@@ -120,17 +111,28 @@
                   *ngFor="let stat of directoryResult.stats[title.toString()]"
                 >
                   <div *ngIf="stat.type && stat.type == 'base'" class="row">
-                    <li class="left col">{{ stat.name }} :</li>
-                    <li class="right col">
+                    <dd class="left col">
+                      {{ normalizeFromCamel(stat.name) }} :
+                    </dd>
+                    <dd class="right col">
                       {{ stat.value }}
-                    </li>
+                    </dd>
+                  </div>
+                  <div
+                    *ngIf="stat.type && stat.type == 'errors' && stat.value > 0"
+                    class="row errors"
+                  >
+                    <dd class="left col">
+                      {{ normalizeFromCamel(stat.name) }}
+                    </dd>
+                    <dd class="right col">{{ stat.value }}</dd>
                   </div>
                   <div
                     *ngIf="stat.type && stat.type == 'file_type'"
                     class="row"
                   >
                     <li class="left col">
-                      {{ stat.name }}
+                      {{ normalizeFromCamel(stat.name) }}
                     </li>
 
                     <li class="right col">
@@ -158,21 +160,20 @@
         <h3 class="head">Files</h3>
         <dl>
           <div class="textOuter">
-            <dt>file name</dt>
-            <dt>file types</dt>
+            <dt>File name</dt>
+            <dt>File types</dt>
           </div>
 
-          <div
-            *ngFor="let file of directoryResult.files"
-            style="display: contents"
-          >
-            <div
-              *ngIf="removeFileExtension(file) && getFileExtension(file)"
-              class="textOuter ddOuter"
-            >
-              <dd class="fileName">{{ removeFileExtension(file) }}</dd>
-              <dd class="extension">{{ getFileExtension(file) }}</dd>
-            </div>
+          <div class="filesScroll">
+            <span *ngFor="let file of directoryResult.files">
+              <div
+                *ngIf="removeFileExtension(file) && getFileExtension(file)"
+                class="textOuter ddOuter"
+              >
+                <dd class="fileName">{{ removeFileExtension(file) }}</dd>
+                <dd class="extension">{{ getFileExtension(file) }}</dd>
+              </div>
+            </span>
           </div>
         </dl>
       </div>

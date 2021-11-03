@@ -4,6 +4,7 @@ import {
   FileSearchErrorInterface,
   FileSearchInterface,
 } from 'src/app/config/interfaces/file-search-interface';
+import { normalizeFromCamel } from 'src/app/util/text';
 
 import { PathfinderService } from 'src/app/services/pathfinder.service';
 
@@ -14,6 +15,7 @@ import { PathfinderService } from 'src/app/services/pathfinder.service';
 })
 export class FileSearchComponent implements OnInit {
   directoryResult: FileSearchInterface | FileSearchErrorInterface | any;
+  normalizeFromCamel = normalizeFromCamel;
 
   objectKeys = Object.keys;
   pathForm = this.formBuilder.group({
@@ -47,7 +49,7 @@ export class FileSearchComponent implements OnInit {
       },
       (err: FileSearchErrorInterface) => {
         console.error(err);
-        this.directoryResult = err;
+        this.directoryResult = err.error;
       },
       () => console.log('HTTP request completed.')
     );
@@ -84,9 +86,6 @@ export class FileSearchComponent implements OnInit {
     this.getFiles(newPath ? newPath[0] : curPath);
   }
 
-  normalizeText(text: string) {
-    return text[0].toUpperCase() + text.slice(1).toLowerCase();
-  }
   cleanPath(path: string) {
     return path
       .trim()

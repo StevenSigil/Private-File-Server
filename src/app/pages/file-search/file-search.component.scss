@@ -130,6 +130,10 @@ $border-radius--card-btn: calc(0.25rem + 8px);
 
           h4 {
             white-space: nowrap;
+
+            a {
+              border-bottom: solid 1px #fff;
+            }
           }
         }
       }
@@ -171,6 +175,7 @@ $border-radius--card-btn: calc(0.25rem + 8px);
       flex-direction: column;
 
       .head {
+        padding: 0;
         margin-bottom: 1rem;
 
         h3 {
@@ -187,6 +192,10 @@ $border-radius--card-btn: calc(0.25rem + 8px);
           .list-unstyled {
             margin: 0;
             text-align: start;
+
+            .errors {
+              color: red;
+            }
           }
         }
       }
@@ -207,15 +216,42 @@ $border-radius--card-btn: calc(0.25rem + 8px);
       @include blackCard($color-green);
       width: calc(100% - 4rem);
       margin: 0 auto;
-      padding: 1.5rem 2rem 2rem;
+      padding: 1.5rem 1.5rem 2rem;
 
       display: flex;
       flex-direction: column;
       max-height: 80vh;
+      min-height: 100%;
+      position: relative;
     }
 
     .head {
       margin-bottom: 2rem;
+    }
+
+    dl {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+      padding: 0 0.5rem;
+
+      > .textOuter {
+        padding-right: 1rem;
+      }
+
+      .filesScroll {
+        overflow-y: auto;
+        max-height: 100%;
+        padding-bottom: 1rem;
+        padding-right: 0.5rem;
+
+        span {
+          display: block;
+          position: relative;
+          max-height: fit-content;
+        }
+      }
     }
 
     .textOuter {
@@ -224,6 +260,8 @@ $border-radius--card-btn: calc(0.25rem + 8px);
       flex-direction: row;
       justify-content: space-between;
       margin-bottom: 1rem;
+      position: static;
+      height: auto;
     }
 
     .ddOuter {
@@ -240,11 +278,12 @@ $border-radius--card-btn: calc(0.25rem + 8px);
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
-        width: calc(100% - 50px - 20px);
+        flex: 4;
       }
 
       .extension {
         min-width: 50px;
+        flex: 1;
         text-align: end;
       }
     }
@@ -286,17 +325,15 @@ $border-radius--card-btn: calc(0.25rem + 8px);
 }
 /* width */
 ::-webkit-scrollbar {
-  height: auto;
+  width: 14px;
   border-radius: 6px;
   border-top: 1px solid #fff;
   border-bottom: 1px solid #fff;
 }
-
 // /* Track */
 ::-webkit-scrollbar-track {
   background: inherit;
 }
-
 // /* Handle */
 ::-webkit-scrollbar-thumb {
   border-radius: 20px;
