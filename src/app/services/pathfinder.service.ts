@@ -5,7 +5,7 @@ import {
   HttpErrorResponse,
   HttpHeaders,
 } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 
 import { Constants } from '../config/constants';
@@ -17,8 +17,8 @@ const httpOpts = {
   }),
 };
 
-const directoryPath = `${Constants.API_ENDPOINT}/directory`;
-const videoFilePath = `${Constants.API_ENDPOINT}/file-finder`;
+export const directoryPath = `${Constants.API_ENDPOINT}/directory`;
+export const videoFilePath = `${Constants.API_ENDPOINT}/file-finder`;
 
 @Injectable({
   providedIn: 'root',
@@ -26,8 +26,14 @@ const videoFilePath = `${Constants.API_ENDPOINT}/file-finder`;
 export class PathfinderService {
   constructor(private http: HttpClient) {}
 
-  getFiles() {
-    return this.http.get(directoryPath, httpOpts);
+  getSubDir(path: string) {
+    console.log('\n================\ngetSubDir');
+
+    return this.http
+      .get<FileSearchInterface>(`${Constants.API_ENDPOINT}/directory2`, {
+        params: { path },
+      })
+      .pipe(catchError(this.handleError));
   }
 
   getFiles2(path: string) {
@@ -40,21 +46,20 @@ export class PathfinderService {
     console.log('Requesting from ', videoFilePath);
 
     return this.http
-      .get(
-        videoFilePath +'?path=C:/Users/Steve/Desktop/css_test/Shaun%20of%20the%20Dead.mp4',
-        {
-          headers: new HttpHeaders({
-            Accept: '*',
-          }),
-        }
-      )
+      .get(videoFilePath, {
+        headers: new HttpHeaders({ Accept: 'video/*' }),
+        responseType: 'arraybuffer',
+        params: {
+          path: 'C:/Users/Steve/Desktop/css_test/JOJO_Rabbit.mp4',
+        },
+      })
       .pipe(catchError(this.handleError));
   }
 
   private handleError(error: HttpErrorResponse) {
     if (error.status === 0) {
       // Client side error
-      console.error('An error occurred (client-side): ', error.error);
+      return throwError('An error occurred (client-side): ', error.error);
     } else {
       // Unsuccessful response code from server
       console.warn(error);
@@ -62,8 +67,7 @@ export class PathfinderService {
         `Server returned code ${error.status}, body was:\n`,
         error.error
       );
+      return throwError(error);
     }
-
-    return throwError(error.error);
   }
 }

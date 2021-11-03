@@ -61,9 +61,15 @@
               <!-- || !directoryResult.error -->
               <div class="leftText">
                 <h3>Selected Path:</h3>
-                <h4 class="selection">
+                <div class="selection">
+                  <h4 *ngFor="let part of directoryResult.splitDirectory">
+                    <a (click)="navUpFromPathVal(part)">{{ part }}</a
+                    >/
+                  </h4>
+                </div>
+                <!-- <h4 class="selection">
                   {{ directoryResult.directory }}
-                </h4>
+                </h4> -->
               </div>
 
               <div class="formBtnContainer">
@@ -146,6 +152,7 @@
     *ngIf="directoryResult && !directoryResult.error"
     class="filesNFoldersSection container-fluid"
   >
+    <!-- ========== LEFT (files) ========== -->
     <div class="fileFolderCol col-4">
       <div class="colInner">
         <h3 class="head">Files</h3>
@@ -171,6 +178,7 @@
       </div>
     </div>
 
+    <!-- ========== RIGHT (folders) ========== -->
     <div class="fileFolderCol col">
       <div class="colInner">
         <h3 class="head">Folders</h3>
@@ -181,7 +189,7 @@
 
         <div class="folderOuter">
           <button
-            (click)="getSubFolders(folder)"
+            (click)="getSubDir(folder)"
             *ngFor="let folder of directoryResult.folders"
           >
             {{ folder }}

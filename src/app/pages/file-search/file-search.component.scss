@@ -111,14 +111,26 @@ $border-radius--card-btn: calc(0.25rem + 8px);
       min-height: 100%;
 
       .leftText {
-        margin: 1rem 0;
-        padding: 1rem 2rem 2rem;
+        margin: 2rem 0;
+        padding: 0 2rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
 
         .selection {
-          margin-top: 3rem;
-          text-align: center;
           color: $color-green;
           word-break: break-all;
+          width: fit-content;
+          max-width: 100%;
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+
+          margin: auto auto 0;
+
+          h4 {
+            white-space: nowrap;
+          }
         }
       }
 

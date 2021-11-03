@@ -26,38 +26,24 @@ export class FileSearchComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.pathForm.value.path = 'C:/Users/Steve/Desktop';
-    this.getFiles();
+    this.pathForm.value.path = 'C:/Users/Steve/Desktop'; // DELETE ME
+    this.getFiles(); // DELETE ME
   }
 
-  t(): void {
-    const formCard = document.getElementById('fileDirForm');
-    const selectedPathCard = document.getElementById('selectedPathCard');
-
-    if (selectedPathCard && formCard) {
-      console.log('====================================');
-      console.log(formCard.clientHeight);
-      console.log('====================================');
-
-      selectedPathCard.style.height = formCard.clientHeight.toString() + 'px';
-    }
-    return;
-  }
-
-  getFiles(): void {
+  getFiles(reqPath?: string): void {
     const origPath = this.pathForm.value.path;
     console.log(`\n\nPath submitted...\n ${origPath}`);
+    var cleanedPath = reqPath
+      ? this.cleanPath(reqPath)
+      : this.cleanPath(origPath);
 
-    // Cleanup input before sending request
-    var cleanedPath = String(origPath).trim();
-
-    // replaces  \  or  \\  with  /  then remove trailing  /
-    cleanedPath = cleanedPath.replace(/\\{1,}/g, '/').replace(/\/+$/, '');
-
-    this.pathfinderService.getFiles2(cleanedPath).subscribe(
+    this.pathfinderService.getSubDir(cleanedPath).subscribe(
       (res: FileSearchInterface) => {
         console.log(res);
         this.directoryResult = res;
+        this.directoryResult.splitDirectory = res.directory
+          .replace(/\/$/, '')
+          .split('/');
       },
       (err: FileSearchErrorInterface) => {
         console.error(err);
@@ -69,22 +55,43 @@ export class FileSearchComponent implements OnInit {
     return;
   }
 
-  getSubFolders(folderName: string): void {
-    const currPath = this.directoryResult.directory;
-    const newPath = `${currPath}/${folderName}`;
+  /**
+   * @description Cleans and adds *folderName* to the *directoryResult.directory* path and
+   *              calls *this.getFiles* api call.
+   * @param folderName Part of file to concat with base path string
+   */
+  getSubDir(folderName: string): void {
+    console.log(folderName);
 
-    console.log('\n\nYour path has been submitted: ', newPath);
+    let curPath = this.directoryResult.directory;
+    curPath = curPath.replace(/(\/|\\|\\\\)$/, '') + '/';
+    const submitPath = curPath + folderName;
+    this.getFiles(submitPath);
+  }
 
-    this.pathfinderService.getFiles2(newPath).subscribe((res) => {
-      console.log(res);
-      this.directoryResult = res;
-    });
+  /**
+   * @description Trims the *directoryResult.directory* path up to *clickVal*
+   *              then calls *this.getFiles* api call.
+   * @example
+   * navUpFromPathVal('Users')  // 'C:/Users'
+   */
+  navUpFromPathVal(clickVal: string) {
+    const curPath = this.directoryResult.directory;
 
-    this.pathForm.reset();
+    const r = new RegExp(`^.*${clickVal}`);
+    const newPath = curPath.match(r);
+
+    this.getFiles(newPath ? newPath[0] : curPath);
   }
 
   normalizeText(text: string) {
     return text[0].toUpperCase() + text.slice(1).toLowerCase();
+  }
+  cleanPath(path: string) {
+    return path
+      .trim()
+      .replace(/\\{1,}/g, '/')
+      .replace(/\/+$/, '');
   }
   getFileExtension(fileName: string) {
     const extension = fileName.match(/\.\w+$/);
@@ -94,5 +101,9 @@ export class FileSearchComponent implements OnInit {
     var altered = fileName;
     altered = /\.\w+$/.test(altered) ? altered.replace(/\.\w+$/, '') : '';
     return altered;
+  }
+  regexTest(re: string, tester: string) {
+    const reg = new RegExp(re);
+    return reg.test(tester);
   }
 }

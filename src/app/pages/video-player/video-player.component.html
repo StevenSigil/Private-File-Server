@@ -1,5 +1,5 @@
 <div class="container text-center">
   <video controls width="720" height="405">
-    <source *ngIf="videoReady" src="http://localhost:3000/api/file-finder" />
+    <source *ngIf="videoReady" src="{{videoFilePath}}" />
   </video>
 </div>

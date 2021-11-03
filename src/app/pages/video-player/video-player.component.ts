@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { PathfinderService } from 'src/app/services/pathfinder.service';
+import {
+  PathfinderService,
+  videoFilePath,
+} from 'src/app/services/pathfinder.service';
 
 @Component({
   selector: 'app-video-player',
@@ -8,6 +11,7 @@ import { PathfinderService } from 'src/app/services/pathfinder.service';
 })
 export class VideoPlayerComponent implements OnInit {
   videoReady: boolean = false;
+  videoFilePath: typeof videoFilePath = videoFilePath;
 
   constructor(private pathFinderService: PathfinderService) {}
 
@@ -17,7 +21,8 @@ export class VideoPlayerComponent implements OnInit {
         this.videoReady = true;
       },
       (err) => {
-        console.log(err);
+        console.log('\nvideo-player.component: 20');
+        console.warn(err);
         this.videoReady = true;
       },
       () => console.log('HTTP request completed.')

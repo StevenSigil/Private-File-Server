@@ -7,12 +7,13 @@ import json
 def get_directory(dir_path="C:/Users/Steve/Desktop"):
     try:
         directory, folders, files = next(os.walk(dir_path, topdown=True))
+        # print(directory, folders, files)
 
         stats = dict()
         stats['counts'] = [
             {"name": "files", "value": len(files), 'type': 'base'},
             {"name": "folders", "value": len(folders), 'type': 'base'},
-            ]
+        ]
 
         # get file types and add to stats.counts
         file_types = get_file_extensions_and_counts(files)
@@ -32,7 +33,7 @@ def get_directory(dir_path="C:/Users/Steve/Desktop"):
         "folders": folders,
         "files": files,
         "stats": stats,
-        }
+    }
 
     # Encode to JSON
     encoded_string = json.dumps(return_obj)
@@ -52,14 +53,14 @@ def get_file_extensions_and_counts(filenames: list):
         # Gets the extension from the file name
         try:
             ext = re.search(r'(.)\.\w+$', filename)
-            if ext.group():
+            if ext and ext.group():
                 ext = ext.group()[1:]
-            # print(ext)
+                # print(ext)
 
-            if ext in filetypes.keys():
-                filetypes[ext] += 1
-            else:
-                filetypes[ext] = 1
+                if ext in filetypes.keys():
+                    filetypes[ext] += 1
+                else:
+                    filetypes[ext] = 1
 
         except StopIteration:
             pass
@@ -92,4 +93,4 @@ if __name__ == "__main__":
     dirArg = sys.argv[1]
     print(get_directory(dirArg))
 
-    # print(get_directory("D:/USERS/Steve"))
+    # print(get_directory("C:/"))
