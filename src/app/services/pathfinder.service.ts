@@ -13,6 +13,7 @@ import { FileSearchInterface } from '../config/interfaces/file-search-interface'
 
 export const directoryPath = `${Constants.API_ENDPOINT}/directory`;
 export const videoFilePath = `${Constants.API_ENDPOINT}/video`;
+export const createSessionFilePath = `${Constants.API_ENDPOINT}/create-session-file`;
 
 @Injectable({
   providedIn: 'root',
@@ -23,7 +24,7 @@ export class PathfinderService {
   postPathToContinue(path: string) {
     // console.log(path);
     return this.http
-      .post(`${Constants.API_ENDPOINT}/create-file-from-path`, JSON.parse(path))
+      .post(createSessionFilePath, JSON.parse(path))
       .pipe(catchError(this.handleError));
   }
 

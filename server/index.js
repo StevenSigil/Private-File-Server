@@ -45,10 +45,46 @@ app.route("/api/test").get((req, res) => {
     });
 });
 
+app.route("/").get((req, res) => {
+  res.sendFile("/index.html");
+});
+
 app
-  .route("/api/create-file-from-path")
+  .route("/api/directory2")
+  .get(logRequest, getDirectoryContent, (req, res) => {
+    if (res.directory_content && !res.directory_content.errno) {
+      res.json(res.directory_content);
+    } else {
+      handleError(res, res.directory_content);
+    }
+  });
+
+app.route("/api/directory").get(logRequest, (req, res) => {
+  const query = req.query ? req.query.path : undefined;
+  console.log(`QUERY: ${query}`);
+
+  if (query) {
+    pyRunner
+      .runPy("main.py", query)
+      .then((result) => {
+        res.send(result);
+      })
+      .catch((err) => {
+        res.status(404).send(err);
+      });
+  }
+});
+
+app
+  .route("/api/create-session-file")
   .post(logRequest, getDirectoryContent, async (req, res) => {
     // Expecting req.body = {path: directory, filename: fileName}
+
+    // =====================================================
+    // ======================= TODO ========================
+    //   TODO: Separate below into functions to simplify!
+    // =====================================================
+    // =====================================================
 
     console.log("Attempting to create a new SESSION...");
 
@@ -119,36 +155,6 @@ app
     }
   });
 
-app.route("/").get((req, res) => {
-  res.sendFile("/index.html");
-});
-
-app
-  .route("/api/directory2")
-  .get(logRequest, getDirectoryContent, (req, res) => {
-    if (res.directory_content && !res.directory_content.errno) {
-      res.json(res.directory_content);
-    } else {
-      handleError(res, res.directory_content);
-    }
-  });
-
-app.route("/api/directory").get(logRequest, (req, res) => {
-  const query = req.query ? req.query.path : undefined;
-  console.log(`QUERY: ${query}`);
-
-  if (query) {
-    pyRunner
-      .runPy("main.py", query)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        res.status(404).send(err);
-      });
-  }
-});
-
 var currViewingVideoPath = "";
 const sampleVideo = "C:/Users/Steve/Desktop/css_test/Shaun of the Dead.mp4";
 
@@ -209,7 +215,8 @@ app.listen(PORT, () =>
   console.log(`SERVER STARTED...\nListening: http://localhost:${PORT}`)
 );
 
-// ======================================================================================
+// =======================================================================================================
+// =======================================================================================================
 // app.get("/api/directory", async (req, res) => {
 //   console.log("\n====================================");
 //   console.log('NEW REQUEST TO: "/api/t"');

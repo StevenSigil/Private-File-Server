@@ -98,7 +98,7 @@ export class FileSearchComponent implements OnInit {
 
         // ====================================================
         // ======================= TODO =======================
-        //     TODO: Progress the User to directory screen
+        //        TODO: Advance the User to next page!
         // ====================================================
         // ====================================================
       },
