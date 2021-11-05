@@ -1,0 +1,37 @@
+<div class="modal" id="exampleModal" aria-hidden="false">
+  <!--  *ngIf="modalContent && modalContent.isShowing" -->
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" *ngIf="modalContent && modalContent.headerText">
+          {{ modalContent.headerText }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+
+      <div class="modal-body" *ngIf="modalContent && modalContent.bodyContent">
+        <div [innerHTML]="modalContent.bodyContent"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn btn-primary"
+          data-bs-dismiss="modal"
+          *ngIf="modalContent && modalContent.confirmBtnText"
+        >
+          {{ modalContent.confirmBtnText }}
+        </button>
+        <button
+          class="btn btn-secondary"
+          *ngIf="modalContent && modalContent.cancelBtnText"
+        >
+          {{ modalContent.cancelBtnText }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

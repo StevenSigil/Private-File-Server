@@ -11,7 +11,7 @@ export class AppComponent implements OnInit {
   title = Constants.TitleOfSite;
 
   constructor(private titleService: Title) {
-    console.log(Constants.API_ENDPOINT);
+    // console.log(Constants.API_ENDPOINT);
   }
 
   public setTitle(newTitle?: string) {

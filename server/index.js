@@ -1,15 +1,27 @@
-const express = require("express");
-const path = require("path");
-const fs = require("fs");
+import express from "express";
+import path from "path";
+import fs from "fs";
+import fsPromises from "fs/promises";
+import Constants from "./data/constants.js";
 
-const pyRunner = require("./util/runPy");
-const { getDirectoryContent, logRequest } = require("./util/middleware");
+import pyRunner from "./util/runPy.js";
+import {
+  getDirectoryContent,
+  handleError,
+  logRequest,
+} from "./util/middleware.js";
+import { checkPathExists, updateSessionsMaster } from "./util/pathHelpers.js";
+import { getJSONFile, writeJSONFile } from "./util/fileHelpers.js";
+import { getUUID } from "./util/uuid.js";
+import { throwError } from "rxjs";
+
 const app = express();
-const PORT = 3000;
+const PORT = Constants.API_PORT;
+const __dirname = path.resolve();
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "/../dist/frontend")));
+app.use(express.static(path.join(__dirname, "/dist/frontend")));
 app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -19,8 +31,96 @@ app.use((req, res, next) => {
   next();
 });
 
+app.route("/api/test").get((req, res) => {
+  const testFile =
+    "C:/Users/Steve/Desktop/PythonDirectoryTest/frontend/server/data/sessions/test.json";
+
+  getJSONFile(testFile)
+    .then((d) => {
+      console.log("\n\nCONTENTS OF FILE:", d);
+      d ? res.json({ data: d }) : res.json({ error: "NO DATA" });
+    })
+    .catch((err) => {
+      handleError(res, err);
+    });
+});
+
+app
+  .route("/api/create-file-from-path")
+  .post(logRequest, getDirectoryContent, async (req, res) => {
+    // Expecting req.body = {path: directory, filename: fileName}
+
+    console.log("Attempting to create a new SESSION...");
+
+    const body = req.body;
+    const fileName = body.fileName || body.filename;
+
+    const sessionDestination = path.join(
+      Constants.PathToSessions,
+      fileName + ".json"
+    );
+
+    try {
+      // Check if file is already in data folder...
+      const fileExists = await checkPathExists(sessionDestination, null, true);
+      // console.log("isExistingFile:\t", fileExists);
+
+      if (fileExists.exists) {
+        const e = new Error(`File already found at ${sessionDestination}`);
+        throw e;
+      }
+    } catch (e) {
+      // Reject response and exit if file is found
+      handleError(res, e, null, "EXISTS");
+      return;
+    }
+
+    const uuid = getUUID();
+    const nowDate = new Date().toLocaleString();
+
+    // Middleware already set directory, files, & folders data to res.directory_content
+    const { directory, files, folders } = res.directory_content;
+
+    const data = {
+      uuid: uuid,
+      sessionName: fileName,
+      created: nowDate,
+      updated: nowDate,
+      sessionPath: sessionDestination,
+      directoryInfo: {
+        basePath: directory,
+        files,
+        folders,
+      },
+    };
+
+    try {
+      const writeData = data;
+
+      // Write file in data folder
+      const writeResponse = await writeJSONFile(sessionDestination, writeData);
+
+      //
+      if (writeResponse) {
+        const writeMasterRes = await updateSessionsMaster(writeData);
+        // console.log("updateSessionsMaster was successful!");
+        const finalResponse = {
+          session: writeResponse,
+          master: writeMasterRes,
+        };
+        res.json(finalResponse);
+        console.log("Session created successfully!");
+      } else {
+        throw new Error(writeResponse);
+      }
+    } catch (err) {
+      handleError(res, err);
+      return;
+    }
+  });
+
 app.route("/").get((req, res) => {
-  res.sendFile("index.html");
+  res.sendFile("/index.html");
 });
 
 app
@@ -29,14 +129,7 @@ app
     if (res.directory_content && !res.directory_content.errno) {
       res.json(res.directory_content);
     } else {
-      const { code, syscall, path } = res.directory_content;
-      const jsonError = {
-        error: `ERROR RETRIEVING DIRECTORY!\tSee terminal for details.`,
-        code,
-        syscall,
-        path,
-      };
-      res.status(400).send(jsonError);
+      handleError(res, res.directory_content);
     }
   });
 
@@ -112,7 +205,9 @@ app.route("/api/video").get(async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
+app.listen(PORT, () =>
+  console.log(`SERVER STARTED...\nListening: http://localhost:${PORT}`)
+);
 
 // ======================================================================================
 // app.get("/api/directory", async (req, res) => {

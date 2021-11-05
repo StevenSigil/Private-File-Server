@@ -1,9 +1,9 @@
-const { spawn } = require("child_process");
+import { spawn } from "child_process";
 const pythonDir = "./server/python_scripts/";
 // const python = pythonDir + "venv/scripts/python.exe";
 const python = "python";
 
-function runPy(scriptName, args) {
+export default function runPy(scriptName, args) {
   return new Promise(function (success, reject) {
     const script = pythonDir + scriptName;
     const pyArgs = [script, args];
@@ -39,5 +39,3 @@ function runPy(scriptName, args) {
     });
   });
 }
-
-module.exports.runPy = runPy;

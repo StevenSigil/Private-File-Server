@@ -6,16 +6,10 @@ import {
   HttpHeaders,
 } from '@angular/common/http';
 import { throwError } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 
 import { Constants } from '../config/constants';
 import { FileSearchInterface } from '../config/interfaces/file-search-interface';
-
-const httpOpts = {
-  headers: new HttpHeaders({
-    'Content-Type': 'application/json',
-  }),
-};
 
 export const directoryPath = `${Constants.API_ENDPOINT}/directory`;
 export const videoFilePath = `${Constants.API_ENDPOINT}/video`;
@@ -26,9 +20,14 @@ export const videoFilePath = `${Constants.API_ENDPOINT}/video`;
 export class PathfinderService {
   constructor(private http: HttpClient) {}
 
-  getSubDir(path: string) {
-    console.log('\n================\ngetSubDir');
+  postPathToContinue(path: string) {
+    // console.log(path);
+    return this.http
+      .post(`${Constants.API_ENDPOINT}/create-file-from-path`, JSON.parse(path))
+      .pipe(catchError(this.handleError));
+  }
 
+  getSubDir(path: string) {
     return this.http
       .get<FileSearchInterface>(`${Constants.API_ENDPOINT}/directory2`, {
         params: { path },
@@ -36,15 +35,8 @@ export class PathfinderService {
       .pipe(catchError(this.handleError));
   }
 
-  getFiles2(path: string) {
-    return this.http
-      .get<FileSearchInterface>(directoryPath + `?path=${path}`)
-      .pipe(catchError(this.handleError));
-  }
-
   getVideoFile(path: string | any) {
     console.log('Requesting from ', videoFilePath);
-
     return this.http
       .get(videoFilePath, {
         headers: new HttpHeaders({ Accept: 'video/*' }),
@@ -53,6 +45,13 @@ export class PathfinderService {
           path: 'C:/Users/Steve/Desktop/css_test/JOJO_Rabbit.mp4',
         },
       })
+      .pipe(catchError(this.handleError));
+  }
+
+  /** Sends a GET request to ".../api/test" */
+  testService() {
+    return this.http
+      .get(`${Constants.API_ENDPOINT}/test`)
       .pipe(catchError(this.handleError));
   }
 

@@ -10,6 +10,7 @@ import { FileSearchComponent } from './pages/file-search/file-search.component';
 import { HomeComponent } from './pages/home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { VideoPlayerComponent } from './pages/video-player/video-player.component';
+import { SubmitModalComponent } from './components/modals/submit-modal/submit-modal.component';
 
 @NgModule({
   declarations: [
@@ -18,8 +19,9 @@ import { VideoPlayerComponent } from './pages/video-player/video-player.componen
     FileSearchComponent,
     HomeComponent,
     VideoPlayerComponent,
+    SubmitModalComponent,
   ],
-   imports: [
+  imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,

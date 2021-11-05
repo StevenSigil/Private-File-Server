@@ -25,3 +25,74 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+<br />
+
+---
+
+<br/>
+
+# Creating a new Session Document
+
+<br />
+
+- **front**: Ask user for session name
+  - Format session name and change as needed
+  - Confirm name and base file directory with User --> yes/no
+    - _no_: Reset modal and re-prompt...
+    - _yes_: Close modal, START loading animation, continue
+
+<br />
+
+- **back**: check if name (filename @ data path) already exists --> yes/no
+  - _yes_: throw and respond to error
+  - _no_:
+    - Get target directory information and add additional record information
+    - Create (write) SESSION data to JSON file @ "data/sessions/file.json" path
+    - Update MASTER session file with new session info.
+    - Send JSON Success Response & continue...
+
+<br />
+
+- **front**: Wait for **API** response --> success/reject
+  - STOP loading animation
+    - _reject_: alert user session already exists
+    - _success_: continue
+
+<br />
+
+**TODO: _Should subdirectories be resolved???_**
+
+### ex:
+
+```json
+// sessionName.json
+{
+  "uuid": "xxx-xxx-xxx-...",
+  "sessionName": "mySession",
+  "created": "05/05/2005T15:05",
+  "updated": "04/04/2004T14:04",
+  "sessionPath": "C:/Users/.../server/data/filename.json",
+  "directoryInfo": {
+    "basePath": "C:/Users/.../my dir/",
+    "files": ["x.ext", "y.ex", "z.ext"],
+    "folders": ["a", "b", "c"]
+  }
+}
+```
+
+```json
+// MASTER.json
+{
+  "mySession": {
+    "uuid": "xxx-xxx-xxx-...",
+    "sessionName": "mySession",
+    "created": "05/05/2005T15:05",
+    "updated": "04/04/2004T14:04",
+    "sessionPath": "C:/Users/.../server/data/filename.json"
+  },
+  "session2": {
+    ...
+  }
+}
+```

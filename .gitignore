@@ -47,5 +47,6 @@ testem.log
 Thumbs.db
 
 # Private Files
-src/app/config
+constants.*
 /venv
+server/data

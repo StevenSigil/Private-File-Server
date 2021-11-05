@@ -1,8 +1,21 @@
-<div class="container-fluid">
+<div class="container-fluid main-top">
   <section class="container-fluid fileSearchInputSection">
     <div class="row">
       <div class="col-9 leftCols">
         <h1 class="display-3 heading">File Search</h1>
+
+        <!-- ========================================================= -->
+        <!-- ====================== TEST BUTTON ====================== -->
+        <!-- <button
+          type="button"
+          class="btn btn-outline-primary"
+          style="margin: 0 1rem 2.5rem"
+          data-bs-toggle="modal"
+          data-bs-target="#sessionNameModal"
+        >
+          😊 Button 😊
+        </button> -->
+
         <div class="row">
           <!-- ========================================================= -->
           <!-- ====================== LEFT COLUMN ====================== -->
@@ -67,12 +80,16 @@
               </div>
 
               <div class="formBtnContainer">
-                <button>Use This Path</button>
-                <!-- TODO: This btn -->
+                <button
+                  data-bs-toggle="modal"
+                  data-bs-target="#sessionNameModal"
+                >
+                  Use This Path
+                </button>
               </div>
             </div>
 
-            <!-- ============ ERROR ============ -->
+            <!-- ================== ERROR ================== -->
             <div
               *ngIf="directoryResult && directoryResult.error"
               class="errorDiv blackCard"
@@ -199,4 +216,138 @@
       </div>
     </div>
   </section>
+</div>
+
+<!-- ========================================================= -->
+<!-- ====================== ERROR POPUP ====================== -->
+<div *ngIf="customAlert.show" class="customAlert">
+  <div *ngIf="customAlert.heading" class="head">
+    <h5>{{ customAlert.heading }}</h5>
+    <button (click)="cancelCustomError()" class="btn">X</button>
+  </div>
+
+  <div class="body">
+    <p>{{ customAlert.message }}</p>
+    <small>
+      <em>{{ customAlert.type }}</em>
+    </small>
+  </div>
+</div>
+
+<!-- ========================================================= -->
+<!-- ==================== LOADING OVERLAY ==================== -->
+<div *ngIf="isLoading" class="loader">
+  <h2>Loading...</h2>
+  <span class="animObj0"></span>
+</div>
+
+<!-- ========================================================= -->
+<!-- =========== modal for submitting & continuing =========== -->
+<div
+  id="sessionNameModal"
+  class="modal sessionNameModal"
+  *ngIf="directoryResult && directoryResult.directory"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form [formGroup]="sessionForm" (ngSubmit)="submitSessionName()">
+        <div class="modal-header">
+          <h5 *ngIf="!this.hasSubmitted" class="modal-title">
+            More Information is Needed
+          </h5>
+          <h5 *ngIf="this.hasSubmitted" class="modal-title">
+            Setup Almost Complete
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            (click)="handleSessionModalReset()"
+            data-bs-dismiss="modal"
+          >
+            X
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <label for="sessionName" class="form-label">
+            <h6 *ngIf="!this.hasSubmitted">
+              What would you like your session to be named?
+            </h6>
+            <h6 *ngIf="this.hasSubmitted">
+              Please Confirm this name and this base directory
+            </h6>
+          </label>
+
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Enter a name here"
+            formControlName="sessionName"
+            id="sessionName"
+            aria-describedby="sessionNameHelp"
+          />
+
+          <dl>
+            <dt>Selected Base Directory:</dt>
+            <dd>
+              <em>{{ directoryResult.directory }}</em>
+            </dd>
+          </dl>
+
+          <div
+            id="sessionNameHelpBlock"
+            class="form-alert-text"
+            *ngIf="hasSubmitted && submissionFormatErr"
+          >
+            <p>
+              <strong> ALERT: </strong>
+              Your chosen name must be changed to
+              <strong>"{{ formattedSubmissionName }}"</strong>
+            </p>
+            <p>Please click "OK" to confirm this change...</p>
+          </div>
+        </div>
+
+        <div class="modal-footer" id="footer2" *ngIf="hasSubmitted">
+          <button
+            class="warning btn"
+            data-bs-dismiss="modal"
+            (click)="handleSessionModalReset()"
+          >
+            Cancel
+          </button>
+
+          <!-- Same as "Cancel" but doesn't close modal -->
+          <button
+            type="button"
+            class="btn middleBtn"
+            (click)="handleSessionModalReset()"
+          >
+            Change Name
+          </button>
+          <button
+            type="button"
+            class="positive btn"
+            (click)="handleFinalSessionSetupSubmit()"
+            data-bs-dismiss="modal"
+          >
+            OK-2
+          </button>
+        </div>
+
+        <div class="modal-footer" id="footer1" *ngIf="!hasSubmitted">
+          <button
+            type="button"
+            class="warning btn"
+            data-bs-dismiss="modal"
+            (click)="handleSessionModalReset()"
+          >
+            Cancel
+          </button>
+          <div class="separator"></div>
+          <button type="submit" class="positive btn">OK-1</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
