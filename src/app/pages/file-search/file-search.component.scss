@@ -358,25 +358,56 @@ $border-radius--card-btn: calc(0.25rem + 8px);
         }
       }
       .modal-body {
-        padding: 1rem 0;
-
-        label {
-          padding-left: 1rem;
-          padding-right: 1rem;
-          text-align: center;
-        }
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding-bottom: 0.5rem;
 
         input {
-          margin-bottom: 1rem;
-          border-radius: 0;
-          // border-top-left-radius: 0;
-          // border-bottom-left-radius: 0;
-          // max-width: 80%;
+          margin-bottom: 1.5rem;
           padding-left: 1rem;
         }
 
+        h6 {
+          margin: 0;
+        }
+        .form-text {
+          color: darken(#ffffff, 20%);
+          margin-top: 0;
+        }
+        .text-negative {
+          color: red;
+          font-weight: 600;
+          font-size: 0.925em;
+          margin-bottom: 1.5rem;
+        }
+        .form-check {
+          min-height: fit-content;
+          padding-top: 1rem;
+          margin-top: 0;
+          margin-bottom: 0;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+
+          & > * {
+            margin: 0 0.2rem;
+          }
+        }
+
+        dl {
+          margin: 0 0 0.5rem;
+
+          dt {
+            margin: 0;
+          }
+          dd {
+            margin: 0 0 0 1rem;
+            word-break: break-all;
+          }
+        }
         .form-alert-text {
-          margin: 1.5rem 0 0;
+          margin: 0.5rem 0 0.5rem;
           padding-left: 1rem;
           padding-right: 1rem;
           color: red;
@@ -386,20 +417,6 @@ $border-radius--card-btn: calc(0.25rem + 8px);
 
           p {
             margin: 0;
-          }
-        }
-
-        dl {
-          padding-left: 1rem;
-          padding-right: 1rem;
-          margin: 1rem 0 0;
-
-          dt {
-            margin: 0;
-          }
-          dd {
-            margin: 0 0 0 1rem;
-            word-break: break-all;
           }
         }
       }
@@ -419,9 +436,6 @@ $border-radius--card-btn: calc(0.25rem + 8px);
           padding: 0.5rem 1.25rem;
           margin: 0;
           border-radius: 0;
-
-          // width: auto;
-          // height: auto;
         }
         .positive {
           border-start-start-radius: $border-radius--card-btn;
@@ -448,8 +462,6 @@ $border-radius--card-btn: calc(0.25rem + 8px);
         .middleBtn {
           border-top-left-radius: $border-radius--card-btn;
           border-top-right-radius: $border-radius--card-btn;
-          // border-top: none;
-          // border-bottom: none;
           border-left: 2px solid black;
           border-right: 2px solid black;
           flex: 1;
@@ -584,27 +596,27 @@ $border-radius--card-btn: calc(0.25rem + 8px);
 
 @keyframes loadingBG {
   0% {
-    background-image: url('../../../assets/icons/LDR-Cross.png');
+    background-image: url("../../../assets/icons/LDR-Cross.png");
   }
   24% {
-    background-image: url('../../../assets/icons/LDR-Cross.png');
+    background-image: url("../../../assets/icons/LDR-Cross.png");
   }
   25% {
-    background-image: url('../../../assets/icons/LDR-OctoRobot.png');
+    background-image: url("../../../assets/icons/LDR-OctoRobot.png");
   }
   49% {
-    background-image: url('../../../assets/icons/LDR-OctoRobot.png');
+    background-image: url("../../../assets/icons/LDR-OctoRobot.png");
   }
   50% {
-    background-image: url('../../../assets/icons/LDR-Skull1.png');
+    background-image: url("../../../assets/icons/LDR-Skull1.png");
   }
   74% {
-    background-image: url('../../../assets/icons/LDR-Skull1.png');
+    background-image: url("../../../assets/icons/LDR-Skull1.png");
   }
   75% {
-    background-image: url('../../../assets/icons/LDR-Pyramid.png');
+    background-image: url("../../../assets/icons/LDR-Pyramid.png");
   }
   100% {
-    background-image: url('../../../assets/icons/LDR-Pyramid.png');
+    background-image: url("../../../assets/icons/LDR-Pyramid.png");
   }
 }

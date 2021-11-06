@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormArray, FormControl } from '@angular/forms';
 import {
   FileSearchErrorInterface,
   FileSearchInterface,
@@ -15,7 +15,19 @@ import { CustomAlertInterface } from 'src/app/config/interfaces/custom-alert-int
   styleUrls: ['./file-search.component.scss'],
 })
 export class FileSearchComponent implements OnInit {
-  directoryResult: FileSearchInterface | FileSearchErrorInterface | any;
+  pathForm = this.formBuilder.group({
+    path: '',
+  });
+  sessionForm = this.formBuilder.group({
+    sessionName: [''],
+    sessionType: ['movies'],
+  });
+
+  sessionTypeOpts: string[] = ['Movies', 'Images', 'General'];
+  formattedSubmissionName: string | undefined;
+  formattedSubmissionType: string | undefined =
+    this.sessionForm.value.sessionType || '';
+
   customAlert: CustomAlertInterface = {
     heading: 'ERROR',
     message: 'An error has occured!',
@@ -23,23 +35,16 @@ export class FileSearchComponent implements OnInit {
     show: false,
   };
 
+  directoryResult: FileSearchInterface | FileSearchErrorInterface | any;
+
   modalIsOpen: boolean = false;
   hasSubmitted: boolean = false;
   submissionFormatErr: boolean = false;
-  formattedSubmissionName: string | undefined;
-
   isLoading: boolean = false;
   alertTimeout: any;
 
   normalizeFromCamel = normalizeFromCamel;
   objectKeys = Object.keys;
-
-  pathForm = this.formBuilder.group({
-    path: '',
-  });
-  sessionForm = this.formBuilder.group({
-    sessionName: '',
-  });
 
   constructor(
     private pathfinderService: PathfinderService,
@@ -49,12 +54,16 @@ export class FileSearchComponent implements OnInit {
   ngOnInit(): void {
     this.pathForm.value.path = 'C:/Users/Steve/Desktop/css_test'; // DELETE ME
     this.getFiles(); // DELETE ME
+
+    this.sessionForm.get('sessionType')?.disable(); // Delete when more options
   }
 
   handleSessionModalReset() {
     this.sessionForm.reset();
     this.sessionForm.get('sessionName')?.enable();
+    this.sessionForm.get('sessionType')?.enable();
     this.formattedSubmissionName = undefined;
+    this.formattedSubmissionType = 'movies';
     this.submissionFormatErr = false;
     this.hasSubmitted = false;
     // console.log('Variables have reset...');
@@ -65,12 +74,18 @@ export class FileSearchComponent implements OnInit {
       // Not submitted -> check & change formatting -> alert user of change OR start function again
 
       this.sessionForm.get('sessionName')?.disable();
+      this.sessionForm.get('sessionType')?.disable();
       this.hasSubmitted = true;
-      const inputData = this.sessionForm.value.sessionName;
-      this.formattedSubmissionName = this.formatSessionName(inputData);
-      // console.log('SUBMITTED!', inputData);
+      const inputData = this.sessionForm.value;
 
-      if (this.formattedSubmissionName != inputData) {
+      this.formattedSubmissionName = this.formatSessionName(
+        inputData.sessionName
+      );
+      this.formattedSubmissionType = this.formatSessionName(
+        inputData.sessionType
+      );
+
+      if (this.formattedSubmissionName != inputData.sessionName) {
         // Alert user of change to session name
         this.submissionFormatErr = true;
       }
@@ -79,7 +94,11 @@ export class FileSearchComponent implements OnInit {
       return this.submitSessionName();
     } else {
       // Formatting is OK -> User confirms info or backs out...
-      console.log('FORMATTED INPUT DATA: ', this.formattedSubmissionName);
+      console.log(
+        'FORMATTED INPUT DATA: ',
+        this.formattedSubmissionName,
+        this.formattedSubmissionType
+      );
     }
   }
 
@@ -87,8 +106,13 @@ export class FileSearchComponent implements OnInit {
     this.isLoading = true;
     const directory = this.directoryResult.directory;
     const fileName = this.formattedSubmissionName;
+    const fileType = this.formattedSubmissionType;
 
-    const reqBody = JSON.stringify({ path: directory, filename: fileName });
+    const reqBody = JSON.stringify({
+      path: directory,
+      filename: fileName,
+      type: fileType,
+    });
 
     this.pathfinderService.postPathToContinue(reqBody).subscribe(
       (res) => {
@@ -122,7 +146,6 @@ export class FileSearchComponent implements OnInit {
       },
       () => {
         this.isLoading = false;
-        this.handleSessionModalReset();
         console.log('HTTP request completed.');
       }
     );

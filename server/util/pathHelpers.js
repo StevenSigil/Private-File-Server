@@ -53,13 +53,15 @@ export async function updateSessionsMaster(updatingData) {
     throw Error(err);
   } finally {
     // Add "sessionName" as key for value of "data"
-    const { uuid, sessionName, created, updated, sessionPath } = updatingData;
+    const { uuid, sessionName, created, updated, type, sessionPath } =
+      updatingData;
     const writeData = sessionsData;
     writeData[sessionName] = {
       uuid,
       sessionName,
       created,
       updated,
+      type,
       sessionPath,
     };
 

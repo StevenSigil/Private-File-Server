@@ -72,6 +72,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
   "sessionName": "mySession",
   "created": "05/05/2005T15:05",
   "updated": "04/04/2004T14:04",
+  "type": "movies",
   "sessionPath": "C:/Users/.../server/data/filename.json",
   "directoryInfo": {
     "basePath": "C:/Users/.../my dir/",
@@ -89,6 +90,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
     "sessionName": "mySession",
     "created": "05/05/2005T15:05",
     "updated": "04/04/2004T14:04",
+    "type": "movies",
     "sessionPath": "C:/Users/.../server/data/filename.json"
   },
   "session2": {

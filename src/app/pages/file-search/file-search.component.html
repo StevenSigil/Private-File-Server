@@ -287,6 +287,36 @@
             aria-describedby="sessionNameHelp"
           />
 
+          <label for="typeSelect" class="form-label">
+            <h6 *ngIf="!this.hasSubmitted">Select a type for this directory</h6>
+          </label>
+          <div class="form-text" id="typeHelp">
+            Note: this choice affects layout and other options
+          </div>
+
+          <div class="d-flex">
+            <div
+              class="form-check form-check-inline"
+              *ngFor="let type of sessionTypeOpts; let i = index"
+            >
+              <input
+                class="form-check-input"
+                type="radio"
+                id="radio-{{ i }}"
+                [value]="type"
+                name="sessionType"
+                formControlName="sessionType"
+              />
+              <label class="form-check-label" for="flexRadioDefault2">
+                {{ type }}
+              </label>
+            </div>
+          </div>
+
+          <div class="form-text text-negative" id="optionsNotice">
+            Note: Currently "movies" is only supported
+          </div>
+
           <dl>
             <dt>Selected Base Directory:</dt>
             <dd>
@@ -306,6 +336,19 @@
             </p>
             <p>Please click "OK" to confirm this change...</p>
           </div>
+        </div>
+
+        <div class="modal-footer" id="footer1" *ngIf="!hasSubmitted">
+          <button
+            type="button"
+            class="warning btn"
+            data-bs-dismiss="modal"
+            (click)="handleSessionModalReset()"
+          >
+            Cancel
+          </button>
+          <div class="separator"></div>
+          <button type="submit" class="positive btn">OK-1</button>
         </div>
 
         <div class="modal-footer" id="footer2" *ngIf="hasSubmitted">
@@ -333,19 +376,6 @@
           >
             OK-2
           </button>
-        </div>
-
-        <div class="modal-footer" id="footer1" *ngIf="!hasSubmitted">
-          <button
-            type="button"
-            class="warning btn"
-            data-bs-dismiss="modal"
-            (click)="handleSessionModalReset()"
-          >
-            Cancel
-          </button>
-          <div class="separator"></div>
-          <button type="submit" class="positive btn">OK-1</button>
         </div>
       </form>
     </div>

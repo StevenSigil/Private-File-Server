@@ -78,7 +78,7 @@ app.route("/api/directory").get(logRequest, (req, res) => {
 app
   .route("/api/create-session-file")
   .post(logRequest, getDirectoryContent, async (req, res) => {
-    // Expecting req.body = {path: directory, filename: fileName}
+    // Expecting req.body = {path: directory, filename: fileName, type: fileType,}
 
     // =====================================================
     // ======================= TODO ========================
@@ -90,6 +90,7 @@ app
 
     const body = req.body;
     const fileName = body.fileName || body.filename;
+    const type = body.type || "movies";
 
     const sessionDestination = path.join(
       Constants.PathToSessions,
@@ -122,6 +123,7 @@ app
       sessionName: fileName,
       created: nowDate,
       updated: nowDate,
+      type: type,
       sessionPath: sessionDestination,
       directoryInfo: {
         basePath: directory,
