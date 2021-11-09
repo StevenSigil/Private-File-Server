@@ -1,7 +1,37 @@
-import fsPromises from "fs/promises";
-import path from "path";
-import Constants from "../data/constants.js";
-import { getJSONFile, writeJSONFile } from "./fileHelpers.js";
+import fsPromises from 'fs/promises';
+import path from 'path';
+import Constants from '../constants.js';
+import {
+  readJSONFile,
+  searchArrayOfObjects,
+  writeJSONFile,
+} from './fileHelpers.js';
+
+export async function checkUniqueSessionName(sessionName) {
+  try {
+    const masterSessionsData = await readJSONFile(
+      Constants.PathToSessionsMaster,
+      true
+    );
+    const matches = await searchArrayOfObjects(
+      sessionName,
+      'sessionName',
+      masterSessionsData,
+      true,
+      false // wont throw error
+    );
+
+    if (typeof matches == 'object' && matches.error) {
+      // No matches are found -> unique sessionName
+      return true;
+    }
+
+    // Matches are found -> Not unique sessionName
+    return false;
+  } catch (err) {
+    throw err;
+  }
+}
 
 export async function checkPathExists(
   dirPath,
@@ -21,7 +51,7 @@ export async function checkPathExists(
       exists = (await fsPromises.stat(dirPath)).isDirectory();
     }
   } catch (err) {
-    if (err.errno == -4058 && err.syscall == "stat") {
+    if (err.errno == -4058 && err.syscall == 'stat') {
       exists = false;
     } else throw err;
   }
@@ -34,13 +64,12 @@ export async function checkPathExists(
 export async function updateSessionsMaster(updatingData) {
   // Expecting "updatingData" = {sessionName: "xyz", ...,}
   const masterFilePath = Constants.PathToSessionsMaster;
-  let sessionsData = {};
+  let sessionsData = [];
 
   // Get existing data in MASTER file
   try {
-    sessionsData = await getJSONFile(masterFilePath);
-    // console.log('SESSIONS DATA:', sessionsData);
-    if (typeof sessionsData == "string") {
+    sessionsData = await readJSONFile(masterFilePath, true); // EXPECTING AN ARRAY of OBJECTS
+    if (typeof sessionsData == 'string') {
       sessionsData = JSON.parse(sessionsData);
     }
   } catch (err) {
@@ -52,33 +81,45 @@ export async function updateSessionsMaster(updatingData) {
     }
     throw Error(err);
   } finally {
-    // Add "sessionName" as key for value of "data"
-    const { uuid, sessionName, created, updated, type, sessionPath } =
-      updatingData;
-    const writeData = sessionsData;
-    writeData[sessionName] = {
-      uuid,
-      sessionName,
-      created,
-      updated,
-      type,
-      sessionPath,
-    };
+    // Add "updatingData" to sessionsData Array
+    sessionsData.push(updatingData);
 
     // Overwrite/Create MASTER file with modified sessionsData
     try {
-      const writeResponse = await writeJSONFile(masterFilePath, writeData);
+      const writeResponse = await writeJSONFile(masterFilePath, sessionsData);
 
-      if (writeResponse && writeResponse.code == "SUCCESS") {
+      if (writeResponse && writeResponse.code == 'SUCCESS') {
         return writeResponse;
       }
       throw Error(
-        "pathHelpers: 56:\nSomething unexpected happened... Check console and fix."
+        'pathHelpers: 56:\nSomething unexpected happened... Check console and fix.'
       );
     } catch (err) {
       throw Error(err);
     }
   }
+
+  // const {
+  //   id,
+  //   sessionName,
+  //   created,
+  //   updated,
+  //   type,
+  //   sessionPath,
+  //   directoryPath,
+  //   directoryContent,
+  // } = updatingData;
+
+  // sessionsData[sessionName] = {
+  //   id,
+  //   sessionName,
+  //   created,
+  //   updated,
+  //   type,
+  //   sessionPath,
+  //   directoryPath,
+  //   directoryContent,
+  // };
 }
 
 // =================================================================

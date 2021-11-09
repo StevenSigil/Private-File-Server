@@ -5,15 +5,23 @@ import {
   HttpErrorResponse,
   HttpHeaders,
 } from '@angular/common/http';
-import { throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { Constants } from '../config/constants';
 import { FileSearchInterface } from '../config/interfaces/file-search-interface';
+import {
+  SessionsInterface,
+  SessionErrorInterface,
+} from '../config/interfaces/sessions-interface';
 
 export const directoryPath = `${Constants.API_ENDPOINT}/directory`;
 export const videoFilePath = `${Constants.API_ENDPOINT}/video`;
-export const createSessionFilePath = `${Constants.API_ENDPOINT}/create-session-file`;
+// export const createSessionFilePath = `${Constants.API_ENDPOINT}/create-session-file`;
+export const newSessionPath = `${Constants.API_ENDPOINT}/new-session`;
+export const allSessionsPath = `${Constants.API_ENDPOINT}/all-sessions-data`;
+export const sessionDataPath = `${Constants.API_ENDPOINT}/session-data`;
+export const movieDataPath = `${Constants.API_ENDPOINT}/movie-data`;
 
 @Injectable({
   providedIn: 'root',
@@ -21,10 +29,29 @@ export const createSessionFilePath = `${Constants.API_ENDPOINT}/create-session-f
 export class PathfinderService {
   constructor(private http: HttpClient) {}
 
-  postPathToContinue(path: string) {
+  getMovieData(moviesToMatch: string[]) {
+    const sendData = { movieFiles: moviesToMatch };
+    return this.http
+      .post(movieDataPath, sendData)
+      .pipe(catchError(this.handleError));
+  }
+
+  getSessionData(sessionName: string): Observable<SessionsInterface> {
+    return this.http
+      .get<SessionsInterface>(sessionDataPath, {
+        params: { sessionName },
+      })
+      .pipe(catchError(this.handleError));
+  }
+
+  getMasterSessionData() {
+    return this.http.get(allSessionsPath).pipe(catchError(this.handleError));
+  }
+
+  createSession(path: string) {
     // console.log(path);
     return this.http
-      .post(createSessionFilePath, JSON.parse(path))
+      .post(newSessionPath, JSON.parse(path))
       .pipe(catchError(this.handleError));
   }
 

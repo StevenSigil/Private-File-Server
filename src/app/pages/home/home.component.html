@@ -1,5 +1,20 @@
 <div class="container">
-  <h1>Home Screen!</h1>
+  <h1 style="margin-bottom: 10rem">Home Screen!</h1>
 
-  <button routerLink="/file-search">File Search</button>
+  <section class="sessionsSection">
+    <div class="heading">
+      <h3>My Sessions</h3>
+    </div>
+
+    <div *ngIf="sessions && !sessions.error" class="sessionContainer">
+      <button
+        *ngFor="let session of sessions"
+        type="button"
+        class="btn sessionBtn"
+        (click)="setSelectedSection(session)"
+      >
+        {{ session.sessionName }}
+      </button>
+    </div>
+  </section>
 </div>

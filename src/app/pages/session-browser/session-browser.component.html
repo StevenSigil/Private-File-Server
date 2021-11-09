@@ -1,0 +1,28 @@
+<div class="main container-fluid" *ngIf="sessionData">
+  <!-- ============================================================== -->
+  <!-- ======================= TESTING BUTTON ======================= -->
+  <button class="btn btn-outline-primary" (click)="toggleSessionsData()">
+    TOGGLE
+  </button>
+
+  <!-- ============================================================== -->
+  <!-- ======================== Session Data ======================== -->
+  <div class="sessionDataOuter" *ngIf="showSessionsData">
+    <div class="head">
+      <button (click)="toggleSessionsData()" class="btn btn-outline-light">
+        X
+      </button>
+      <h4>Session info.</h4>
+    </div>
+    <div class="body">
+      <dl *ngFor="let datum of objectKeys(sessionData); let i = index">
+        <dt>{{ datum }}:</dt>
+        <dl>{{ sessionData[datum] }}</dl>
+      </dl>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================= -->
+<!-- ====================== LOADING OVERLAY ====================== -->
+<app-loading [showing]="!sessionData ? true : false"></app-loading>

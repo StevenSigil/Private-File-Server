@@ -11,6 +11,8 @@ import { HomeComponent } from './pages/home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { VideoPlayerComponent } from './pages/video-player/video-player.component';
 import { SubmitModalComponent } from './components/modals/submit-modal/submit-modal.component';
+import { SessionBrowserComponent } from './pages/session-browser/session-browser.component';
+import { LoadingComponent } from './components/loading/loading.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +22,8 @@ import { SubmitModalComponent } from './components/modals/submit-modal/submit-mo
     HomeComponent,
     VideoPlayerComponent,
     SubmitModalComponent,
+    SessionBrowserComponent,
+    LoadingComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,58 @@
+.main {
+  position: relative;
+}
+
+.sessionDataOuter {
+  border: 1px solid #fff;
+  padding: 1rem 1.5rem;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 33.33%;
+  height: auto;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+
+  .head {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    margin-bottom: 2rem;;
+    align-items: center;
+
+    h4 {
+      margin: 0 auto;
+    }
+
+    button {
+      // color: inherit;
+      // border: 1px solid #fff;
+    }
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+
+    dl {
+      display: flex;
+      flex-direction: row;
+
+      dt {
+        flex: 1;
+      }
+      dl {
+        flex: 3;
+        word-break: break-all;
+      }
+
+      > * {
+        margin-left: 1rem;
+        margin-right: 1rem;
+      }
+    }
+  }
+}

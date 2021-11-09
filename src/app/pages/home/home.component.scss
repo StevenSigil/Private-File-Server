@@ -1,3 +1,26 @@
+@import '../../../styles.scss';
+
 h1 {
   text-align: center;
+}
+
+.sessionsSection {
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+
+  .heading {
+    margin-bottom: 1.5rem;
+  }
+  .sessionContainer {
+    display: flex;
+    flex-direction: column;
+    // align-items: baseline;
+    // justify-content: baseline;
+
+    .sessionBtn {
+      @include darkOutlineBtn();
+      margin: 0 0 1.5rem;
+    }
+  }
 }

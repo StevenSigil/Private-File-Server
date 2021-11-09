@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Attribute, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormArray, FormControl } from '@angular/forms';
 import {
   FileSearchErrorInterface,
@@ -20,7 +20,7 @@ export class FileSearchComponent implements OnInit {
   });
   sessionForm = this.formBuilder.group({
     sessionName: [''],
-    sessionType: ['movies'],
+    sessionType: 'movies',
   });
 
   sessionTypeOpts: string[] = ['Movies', 'Images', 'General'];
@@ -56,6 +56,13 @@ export class FileSearchComponent implements OnInit {
     this.getFiles(); // DELETE ME
 
     this.sessionForm.get('sessionType')?.disable(); // Delete when more options
+  }
+
+  isChecked(value: string) {
+    if (value == 'Movies') {
+      return true;
+    }
+    return false;
   }
 
   handleSessionModalReset() {
@@ -105,16 +112,16 @@ export class FileSearchComponent implements OnInit {
   handleFinalSessionSetupSubmit() {
     this.isLoading = true;
     const directory = this.directoryResult.directory;
-    const fileName = this.formattedSubmissionName;
+    const sessionName = this.formattedSubmissionName;
     const fileType = this.formattedSubmissionType;
 
     const reqBody = JSON.stringify({
       path: directory,
-      filename: fileName,
+      sessionName: sessionName,
       type: fileType,
     });
 
-    this.pathfinderService.postPathToContinue(reqBody).subscribe(
+    this.pathfinderService.createSession(reqBody).subscribe(
       (res) => {
         this.isLoading = false;
         this.handleSessionModalReset();
@@ -137,7 +144,7 @@ export class FileSearchComponent implements OnInit {
           console.log('EXISTS!');
           console.log('====================================');
           this.throwCustomError(
-            'File already exists. Please choose a different name and try again.',
+            'Session already exists. Please choose a different name and try again.',
             'error',
             'Error!'
           );
