@@ -1,13 +1,48 @@
 <div class="main container-fluid" *ngIf="sessionData">
   <!-- ============================================================== -->
   <!-- ======================= TESTING BUTTON ======================= -->
-  <button class="btn btn-outline-primary" (click)="toggleSessionsData()">
+  <!-- <button class="btn btn-outline-primary" (click)="toggleSessionsData()">
     TOGGLE
-  </button>
+  </button> -->
+
+  <div class="head">
+    <h2>{{ sessionData.sessionName }}</h2>
+  </div>
+
+  <div class="movies section">
+    <div class="subHead">
+      <h4>Movies</h4>
+    </div>
+
+    <div class="content" id="movieContent">
+      <div class="singleData" *ngFor="let data of sessionData.movieData">
+        <div class="head" *ngIf="data.poster">
+          <a (click)="joinPathAndNavigate(sessionData.directoryPath, data.fileName)">
+            <img
+              [src]="data.poster.url"
+              [width]="data.poster.width"
+              [height]="data.poster.height"
+          /></a>
+        </div>
+
+        <div class="body">
+          <h5>{{ data.title }}</h5>
+          <p>{{ data.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ============================================================== -->
   <!-- ======================== Session Data ======================== -->
-  <div class="sessionDataOuter" *ngIf="showSessionsData">
+  <!-- <div
+    class="sessionDataOuter"
+    [classList]="
+      this.showSessionsData
+        ? 'sessionDataOuter slideFromRight'
+        : 'sessionDataOuter slideFromLeft'
+    "
+  >
     <div class="head">
       <button (click)="toggleSessionsData()" class="btn btn-outline-light">
         X
@@ -20,7 +55,7 @@
         <dl>{{ sessionData[datum] }}</dl>
       </dl>
     </div>
-  </div>
+  </div> -->
 </div>
 
 <!-- ============================================================= -->

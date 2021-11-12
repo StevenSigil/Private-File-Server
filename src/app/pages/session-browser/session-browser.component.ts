@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+
 import {
   SessionErrorInterface,
   SessionsInterface,
@@ -34,7 +35,8 @@ export class SessionBrowserComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private pathFinderService: PathfinderService
+    private pathFinderService: PathfinderService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -74,7 +76,8 @@ export class SessionBrowserComponent implements OnInit {
   }
 
   toggleSessionsData() {
-    return (this.showSessionsData = !this.showSessionsData);
+    this.showSessionsData = !this.showSessionsData;
+    console.log(this.showSessionsData);
   }
 
   checkForVideoFiles(files: string[]) {
@@ -121,10 +124,22 @@ export class SessionBrowserComponent implements OnInit {
     const videoFiles = this.checkForVideoFiles(files);
     // make api request to retrieve movie info from local doc - movie_data.json
     this.pathFinderService.getMovieData(videoFiles).subscribe(
-      (res) => console.log('getVideoFileDetails RESPONSE:\n\t', res),
+      (res) => {
+        console.log('getVideoFileDetails RESPONSE:\n\t', res);
+
+        // Add video files to "sessionData"
+        this.sessionData.movieData = res;
+      },
       (err) => console.warn('getVideoFileDetails ERROR:\n', err),
       () => console.log('getVideoFileDetails FINAL:\tHTTP Request Complete')
     );
+  }
+
+  joinPathAndNavigate(destPath: string, endFile: string) {
+    const fullPath = /(\\\\|\\|\/)$/.test(destPath)
+      ? destPath + endFile
+      : destPath + `\\${endFile}`;
+    this.router.navigate(['player', fullPath]);
   }
 }
 

@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
 import {
   PathfinderService,
   videoFilePath,
@@ -12,20 +14,44 @@ import {
 export class VideoPlayerComponent implements OnInit {
   videoReady: boolean = false;
   videoFilePath: typeof videoFilePath = videoFilePath;
+  vPath: string = '';
 
-  constructor(private pathFinderService: PathfinderService) {}
+  constructor(
+    private pathFinderService: PathfinderService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
-    this.pathFinderService.getVideoFile('').subscribe(
+    this.videoReady = false;
+    this.sessionFromURL();
+    this.getVideoStream();
+  }
+
+  sessionFromURL() {
+    return this.route.params
+      .subscribe((params) => {
+        this.vPath = params.videoPath;
+        this.videoFilePath =
+          videoFilePath +
+          '/' +
+          this.vPath.replace(/(\/|\\\\|\\)/g, String('%5C'));
+      })
+      .unsubscribe();
+  }
+
+  getVideoStream() {
+    const x = this.pathFinderService.getVideoFile(this.vPath).subscribe(
       (res) => {
         this.videoReady = true;
+        console.log(res);
       },
       (err) => {
-        console.log('\nvideo-player.component: 20');
         console.warn(err);
-        this.videoReady = true;
+        // this.videoReady = true;
       },
-      () => console.log('HTTP request completed.')
+      () => {
+        console.log('HTTP request completed.');
+      }
     );
   }
 }

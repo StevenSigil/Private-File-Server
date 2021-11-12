@@ -1,8 +1,8 @@
-import { readFile, writeFile } from 'fs/promises';
-import Constants from '../constants.js';
-import { normalizeFileName } from './util.js';
+import { readFile, writeFile } from "fs/promises";
+import Constants from "../constants.js";
+import { normalizeFileName } from "./util.js";
 
-export async function readJSONFile(path, returnJson = true, encoding = 'utf8') {
+export async function readJSONFile(path, returnJson = true, encoding = "utf8") {
   try {
     let contents = await readFile(path, encoding);
     contents = returnJson ? JSON.parse(contents) : contents;
@@ -14,8 +14,8 @@ export async function readJSONFile(path, returnJson = true, encoding = 'utf8') {
   }
 }
 
-export async function writeJSONFile(path, writeData, encoding = 'utf8') {
-  if (typeof writeData !== 'string') {
+export async function writeJSONFile(path, writeData, encoding = "utf8") {
+  if (typeof writeData !== "string") {
     writeData = JSON.stringify(writeData, null, 2);
   }
 
@@ -24,7 +24,7 @@ export async function writeJSONFile(path, writeData, encoding = 'utf8') {
 
     return {
       data: `Successfully wrote data to ${path}`,
-      code: 'SUCCESS',
+      code: "SUCCESS",
       path: path,
     };
   } catch (err) {
@@ -54,7 +54,7 @@ export function searchArrayOfObjects(
     // console.log('\n\n\nHERE');
 
     array.forEach((obj) => {
-      const propVal = obj[prop].replace(/[^\w]/gi, '');
+      const propVal = obj[prop].replace(/[^\w]/gi, "");
 
       // console.log(obj);
       // console.log(prop);
@@ -63,7 +63,7 @@ export function searchArrayOfObjects(
 
       // const rCheck = new RegExp(`${value}`, 'gi');
 
-      if (RegExp(`${value}`, 'gi').test(propVal)) {
+      if (RegExp(`${value}`, "gi").test(propVal)) {
         // console.log('CHECK:\t', RegExp(`${value}`, 'gi').test(propVal));
         foundObjs.push(obj);
       }
@@ -114,10 +114,10 @@ export async function lookupMovieByProperty(
     matchValue.forEach((value) => {
       const val = normalizeFileName(value);
       const matchedMovies = [];
-      const splitValue = val.split(' ');
+      const splitValue = val.split(" ");
 
       splitValue.forEach((v) => {
-        v = v.replace(/[^\w]/gi, '');
+        v = v.replace(/[^\w]/gi, "");
 
         const searchResults = searchArrayOfObjects(
           v,
@@ -147,11 +147,12 @@ export async function lookupMovieByProperty(
         const maxScoredMovie = matchedMovies.reduce((prev, current) => {
           return prev.matchScore > current.matchScore ? prev : current;
         });
+        maxScoredMovie.fileName = value;
         // console.log(maxScoredMovie);
         foundData.push(maxScoredMovie);
       } else {
         const notFound = {};
-        notFound.error = 'NOT FOUND';
+        notFound.error = "NOT FOUND";
         notFound.fileName = value;
         foundData.push(notFound);
       }

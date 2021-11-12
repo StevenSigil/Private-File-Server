@@ -1,13 +1,13 @@
-import path from 'path';
-import fs from 'fs';
-import util from 'util';
-import { throwError } from 'rxjs';
-import axios from 'axios';
+import path from "path";
+import fs from "fs";
+import util from "util";
+import { throwError } from "rxjs";
+import axios from "axios";
 
-import { readJSONFile, writeJSONFile } from './fileHelpers.js';
+import { readJSONFile, writeJSONFile } from "./fileHelpers.js";
 
-import { getUUID, normalizeFileName } from './util.js';
-import Constants from '../constants.js';
+import { getUUID, normalizeFileName } from "./util.js";
+import Constants from "../constants.js";
 
 const readDir = util.promisify(fs.readdir);
 const lStat = util.promisify(fs.lstat);
@@ -23,25 +23,25 @@ export async function getDirectoryContent(req, res, next) {
   var query = null;
 
   switch (method) {
-    case 'POST':
-      query = typeof req.body == 'object' ? req.body.path : req.body;
+    case "POST":
+      query = typeof req.body == "object" ? req.body.path : req.body;
       break;
 
-    case 'GET':
-      query = typeof req.query == 'object' ? req.query.path : req.query;
+    case "GET":
+      query = typeof req.query == "object" ? req.query.path : req.query;
       break;
   }
-  query = query != null ? query : 'C:/Users';
+  query = query != null ? query : "C:/Users";
 
   var dirContent;
 
   try {
-    dirContent = await readDir(path.resolve(query + '/'));
+    dirContent = await readDir(path.resolve(query + "/"));
     // console.log(dirContent, query, '\n', path.join(query));
   } catch (err) {
-    if (err.code === 'EPERM') {
+    if (err.code === "EPERM") {
       console.log(`\nmiddleware: 23:\nSYSCALL: "${err.syscall}" NOT PERMITTED`);
-      console.log('Attempting to open from link...');
+      console.log("Attempting to open from link...");
 
       try {
         const tmp = fs.readlinkSync(path.join(query));
@@ -94,15 +94,15 @@ export async function getDirectoryContent(req, res, next) {
               files.push(name);
               const ext = path.extname(path.join(query, name));
 
-              if (ext !== '') {
+              if (ext !== "") {
                 fileTypes[ext] = fileTypes[ext] + 1 || 1;
               }
             } else folders.push(name);
           } catch (err) {
             if (/^(EBUSY|EPERM|NOT ADD)/g.test(err.message)) {
-              console.error('middleware: 68:\n', err.message);
+              console.error("middleware: 68:\n", err.message);
               errFiles.push(err.path);
-            } else return throwError('\n\nSomething unexpected happened!!\n\n');
+            } else return throwError("\n\nSomething unexpected happened!!\n\n");
           }
         }
 
@@ -111,11 +111,11 @@ export async function getDirectoryContent(req, res, next) {
         ret.folders = folders;
         ret.stats = {
           counts: [
-            { name: 'files', value: files.length, type: 'base' },
-            { name: 'folders', value: folders.length, type: 'base' },
-            { name: 'errPaths', value: errFiles.length, type: 'errors' },
+            { name: "files", value: files.length, type: "base" },
+            { name: "folders", value: folders.length, type: "base" },
+            { name: "errPaths", value: errFiles.length, type: "errors" },
           ],
-          fileTypes: nameValueObj(fileTypes, 'file_type'),
+          fileTypes: nameValueObj(fileTypes, "file_type"),
         };
 
         res.directory_content = ret;
@@ -142,24 +142,24 @@ export async function getMovieData(title) {
   try {
     const fTitle = normalizeFileName(title);
 
-    const data = await axios.get('https://en.wikipedia.org/w/api.php', {
+    const data = await axios.get("https://en.wikipedia.org/w/api.php", {
       params: {
-        action: 'query',
-        format: 'json',
-        prop: 'pageimages|description',
+        action: "query",
+        format: "json",
+        prop: "pageimages|description",
         titles: fTitle,
         redirects: 1,
-        piprop: 'thumbnail|name|original',
-        pilicense: 'any',
+        piprop: "thumbnail|name|original",
+        pilicense: "any",
       },
     });
     const rData = data.data;
 
     if (rData.warnings || rData.errors) {
       console.log(
-        '\n\nPROBLEM FROM EXTERNAL API!!!\n',
+        "\n\nPROBLEM FROM EXTERNAL API!!!\n",
         rData.errors || rData.warnings,
-        '\n'
+        "\n"
       );
     }
 
@@ -168,7 +168,7 @@ export async function getMovieData(title) {
       title: d.title,
       description: d.description,
       poster: {
-        type: 'external',
+        type: "external",
         url: d.original.source,
         width: d.original.width,
         height: d.original.height,
@@ -197,7 +197,7 @@ export async function writeNewMovieData(data) {
     const wData = data;
 
     // Check and set "id" for movie if not found in data
-    if (!Object.keys(wData).some((d) => d == 'id')) {
+    if (!Object.keys(wData).some((d) => d == "id")) {
       wData.id = getUUID();
     }
 
@@ -212,7 +212,7 @@ export async function writeNewMovieData(data) {
     }
   } else {
     throw new Error(
-      '\n\nERROR: CANNOT FIND movie_data OBJECT IN movieFile!\nUNABLE TO WRITE TO movie_data.json!'
+      "\n\nERROR: CANNOT FIND movie_data OBJECT IN movieFile!\nUNABLE TO WRITE TO movie_data.json!"
     );
   }
 }
@@ -231,11 +231,11 @@ export async function writeNewMovieData(data) {
 export function handleError(res, err, errMes = null, code = null) {
   const jsonError = {};
   const m =
-    errMes || err.message || err.error || err.err || 'AN ERROR HAS OCCURRED!';
+    errMes || err.message || err.error || err.err || "AN ERROR HAS OCCURRED!";
 
   console.error(err);
 
-  if (typeof err == 'object' && err.code && err.syscall && err.path) {
+  if (typeof err == "object" && err.code && err.syscall && err.path) {
     const { code, syscall, path } = err;
 
     jsonError.code = code;
@@ -252,30 +252,33 @@ export function handleError(res, err, errMes = null, code = null) {
 function cleanPath(path) {
   return path
     .trim()
-    .replace(/\\{1,}/g, '/')
-    .replace(/\/+$/, '');
+    .replace(/\\{1,}/g, "/")
+    .replace(/\/+$/, "");
 }
 
 export function logRequest(req, res, next) {
   const reqURL = req.path;
   const method = req.method;
+  const params = req.params;
   const data = {};
 
   switch (method) {
-    case 'POST':
-      data.type = 'BODY';
+    case "POST":
+      data.type = "BODY";
       data.data = req.body;
       break;
-    case 'GET':
-      data.type = 'QUERY';
+    case "GET":
+      data.type = "QUERY";
       data.data = req.query;
+
+      params ? ((data.type = "PARAMS"), (data.data = params)) : null;
       break;
 
     default:
       console.log(`middleware: 140:\nMethod: "${method}" not found in switch!`);
   }
 
-  console.log('\n=====================================================');
+  console.log("\n=====================================================");
   console.log(`NEW REQUEST TO: "${reqURL}"\n${data.type}:`, data.data);
   next();
 }

@@ -9,6 +9,7 @@ const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'file-search', component: FileSearchComponent },
   { path: 'player', component: VideoPlayerComponent },
+  { path: 'player/:videoPath', component: VideoPlayerComponent },
   { path: 'session/:session', component: SessionBrowserComponent },
 ];
 

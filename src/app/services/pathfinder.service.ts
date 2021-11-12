@@ -6,7 +6,7 @@ import {
   HttpHeaders,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, retry } from 'rxjs/operators';
 
 import { Constants } from '../config/constants';
 import { FileSearchInterface } from '../config/interfaces/file-search-interface';
@@ -49,7 +49,6 @@ export class PathfinderService {
   }
 
   createSession(path: string) {
-    // console.log(path);
     return this.http
       .post(newSessionPath, JSON.parse(path))
       .pipe(catchError(this.handleError));
@@ -64,16 +63,16 @@ export class PathfinderService {
   }
 
   getVideoFile(path: string | any) {
-    console.log('Requesting from ', videoFilePath);
+    if (path) {
+      path = path.replace(/(\\\\|\\|\/\/)/g, '%5C');
+    }
+
     return this.http
-      .get(videoFilePath, {
-        headers: new HttpHeaders({ Accept: 'video/*' }),
+      .get(videoFilePath + `/${path}`, {
+        headers: new HttpHeaders({ Accept: 'video/mp4', Range: 'bytes=0-' }),
         responseType: 'arraybuffer',
-        params: {
-          path: 'C:/Users/Steve/Desktop/css_test/JOJO_Rabbit.mp4',
-        },
       })
-      .pipe(catchError(this.handleError));
+      .pipe(retry(3), catchError(this.handleError));
   }
 
   /** Sends a GET request to ".../api/test" */

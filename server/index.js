@@ -41,9 +41,42 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
+    "Origin, X-Requested-With, Content-Type, Accept, Range"
   );
   next();
+});
+
+app.route("/").get((req, res) => {
+  res.sendFile("/index.html");
+});
+
+app.route("/api/test").get((req, res) => {
+  // const mime = {
+  //   html: "text/html",
+  //   txt: "txt/plain",
+  //   css: "text/css",
+  //   gif: "image/gif",
+  //   jpg: "image/jpeg",
+  //   png: "image/png",
+  //   svg: "image/svg+xml",
+  //   js: "application/javascript",
+  // };
+  // var type = "text/plain";
+  // const file = req.query.path || null;
+  // console.log(file, "\n");
+  // type = file ? mime[path.extname(file).slice(1)] : "text/plain";
+  // const s = file ? fs.createReadStream(file) : fs.createReadStream(app.route('/api/test'));
+  // s.on("open", () => {
+  //   res.set("Content-Type", type);
+  //   s.pipe(res);
+  // });
+  // s.on('end', () => {
+  //   s.close();
+  // })
+  // s.on("error", () => {
+  //   res.set("Content-Type", "text/plain");
+  //   res.status(404).end("Not Found!");
+  // });
 });
 
 app.post("/api/movie-data", logRequest, async (req, res) => {
@@ -59,24 +92,6 @@ app.post("/api/movie-data", logRequest, async (req, res) => {
     handleError(res, err);
     return;
   }
-});
-
-app.route("/api/test").get((req, res) => {
-  const testFile =
-    "C:/Users/Steve/Desktop/PythonDirectoryTest/frontend/server/data/sessions/test.json";
-
-  readJSONFile(testFile)
-    .then((d) => {
-      console.log("\n\nCONTENTS OF FILE:", d);
-      d ? res.json({ data: d }) : res.json({ error: "NO DATA" });
-    })
-    .catch((err) => {
-      handleError(res, err);
-    });
-});
-
-app.route("/").get((req, res) => {
-  res.sendFile("/index.html");
 });
 
 app.route("/api/session-data").get(logRequest, async (req, res) => {
@@ -221,79 +236,50 @@ app
       handleError(res, err);
       return;
     }
-
-    // ========================================================================
-    // ================================= TODO =================================
-    // if (/movie/gi.test(sessionType)) {
-    //   try {
-    //     // FOR EACH MOVIE => CHECK IF MOVIE IS IN movie_data.json AND IF NOT => GETmOVIEdATA (WRITE to movie_data.json)
-    //     // THEN ADD MOVIE UUID'S TO SESSION INFO (FRONTEND WILL RETRIEVE movie_data.json DATA TO DISPLAY)!!!!!
-    //     const movieData = await getMovieData('shaun of the dead.mp4');
-    //   } catch (err) {
-    //     let m = ('ERROR RETRIEVING MOVIE DATA!\n', err);
-    //     console.log(m);
-    //     handleError(res, err, m);
-    //   }
-    // }
-    // ========================================================================
-    // ========================================================================
   });
 
-var currViewingVideoPath = "";
-const sampleVideo = "C:/Users/Steve/Desktop/css_test/Shaun of the Dead.mp4";
+// ========================================================================================
+// ==================================== VIDEO STREAMER ====================================
+app.route("/api/video/:videoPath").get(logRequest, async (req, res, next) => {
+  const vPath = req.params.videoPath;
+  const range = req.headers.range;
 
-app.route("/api/video").get(async (req, res) => {
-  try {
-    console.log("\n====================================");
-    console.log('NEW REQUEST TO: "/api/t"', req.query);
+  if (range) {
+    const x = fs.statSync(path.join(vPath));
+    const videoSize = x.size;
+    const MBChunk = 10 ** 6;
+    const start = range ? range.replace(/\D/g, "") : 0;
+    const end = Math.min(start + MBChunk, videoSize - 1);
+    const contentLength = end - start + 1;
 
-    const vFile =
-      req.query.path !== undefined
-        ? path.normalize(req.query.path)
-        : path.normalize(sampleVideo);
-    const videoSize = fs.statSync(vFile).size;
-    const range = req.headers.range;
+    const stream = new fs.createReadStream(vPath, {
+      start: eval(start),
+      end: eval(end),
+      autoClose: true,
+      emitClose: true,
+    });
 
-    console.log("vFile: ", vFile); // DELETE ME
+    res.set("Content-Range", `bytes ${start}-${end}/${videoSize}`);
+    res.set("Accept-Ranges", "bytes");
+    res.set("Content-Length", contentLength);
+    res.set("Content-Type", `video/${path.extname(vPath)}`);
+    res.set("Cache-Control", "no-store");
+    res.status(206);
 
-    if (range) {
-      console.log("RANGE FOUND IN HEADER");
-      const rangeStringParts = range.replace(/bytes=/, "").split("-");
-      const bStart = parseInt(rangeStringParts[0]);
-      const bEnd = rangeStringParts[1]
-        ? parseInt(rangeStringParts[1])
-        : videoSize - 1;
+    // console.log(x, "\n");
 
-      const CHUNK_SIZE = bEnd - bStart + 1; //1MB
+    stream.pipe(res);
 
-      const vStream = fs.createReadStream(vFile, {
-        start: bStart,
-        end: bEnd,
-      });
-
-      const headers = {
-        "Content-Range": `bytes ${bStart}-${bEnd}/${videoSize}`,
-        "Accept-Ranges": "bytes",
-        "Content-Length": CHUNK_SIZE,
-        "Content-Type": "video/mp4",
-      };
-
-      res.writeHead(206, headers);
-      vStream.pipe(res);
-      return;
-    }
-
-    const headers = {
-      "Content-Length": videoSize,
-      "Content-Type": "video/mp4",
-    };
-    res.writeHead(200, headers);
-    fs.createReadStream(vFile).pipe(res);
-  } catch (err) {
-    console.log("AN ERROR OCCURRED IN TRY/CATCH BLOCK...\n", err);
-    res.status(400).send(err);
+    res.on("close", () => {
+      console.log("\x1b[36m%s\x1b[0m", "CLOSED!");
+      return res.destroy();
+    });
+  } else {
+    res.send();
   }
 });
+// ========================================================================================
+// ========================================================================================
 
 app.route("/api/directory").get(logRequest, (req, res) => {
   const query = req.query ? req.query.path : undefined;

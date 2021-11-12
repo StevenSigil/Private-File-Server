@@ -257,14 +257,21 @@ export class FileSearchComponent implements OnInit {
     return reg.test(tester);
   }
 
-  test() {
-    this.pathfinderService.testService().subscribe(
-      (res: any) => console.log("\nRESPONSE FROM 'test()'\n", res),
-      (err) => {
-        console.error("\nERROR FROM 'test()'\n", err);
-        this.directoryResult = err.error;
-      },
-      () => console.log("'test()' function complete!")
-    );
-  }
+  // test() {
+  //   this.pathfinderService.testService().subscribe(
+  //     (res: any) => console.log("\nRESPONSE FROM 'test()'\n", res),
+  //     (err) => {
+  //       console.error("\nERROR FROM 'test()'\n", err);
+  //       this.directoryResult = err.error;
+  //     },
+  //     () => console.log("'test()' function complete!")
+  //   );
+  // }
+  //
+  // pathfinder.testService() BEFORE CHANGE:
+  // testService() {
+  //     return this.http
+  //     .get(`${Constants.API_ENDPOINT}/test`)
+  //     .pipe(catchError(this.handleError));
+  // }
 }
