@@ -64,3 +64,37 @@ export function checkForVideoFiles(files = []) {
 
   return videoFiles;
 }
+
+export function cloneObject(obj) {
+  if (obj === null) throw new Error("object is null");
+  if (typeof obj != "object") return obj;
+
+  // console.log('\x1b[36m%s\x1b[0m', '\CLONE-OBJECT!:\n', obj);
+
+  if (obj instanceof Date) {
+    // Dates
+    let copy = new Date();
+    copy.setTime(obj.getTime());
+    return copy;
+  }
+
+  // Arrays
+  if (obj instanceof Array) {
+    let copy = [];
+    obj.forEach((x, i) => (copy[i] = cloneObject(obj[i])));
+    return copy;
+  }
+
+  // Objects
+  if (obj instanceof Object) {
+    let copy = {};
+    for (var attr in obj) {
+      if (obj.hasOwnProperty(attr)) copy[attr] = cloneObject(obj[attr]);
+    }
+    return copy;
+  }
+
+  throw new Error(
+    `Object type "${typeof obj}" is not supported by cloneThis function!\n${obj}`
+  );
+}

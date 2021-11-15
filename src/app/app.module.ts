@@ -13,6 +13,7 @@ import { VideoPlayerComponent } from './pages/video-player/video-player.componen
 import { SubmitModalComponent } from './components/modals/submit-modal/submit-modal.component';
 import { SessionBrowserComponent } from './pages/session-browser/session-browser.component';
 import { LoadingComponent } from './components/loading/loading.component';
+import { ImageViewerComponent } from './components/image-viewer/image-viewer/image-viewer.component';
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { LoadingComponent } from './components/loading/loading.component';
     SubmitModalComponent,
     SessionBrowserComponent,
     LoadingComponent,
+    ImageViewerComponent,
   ],
   imports: [
     BrowserModule,

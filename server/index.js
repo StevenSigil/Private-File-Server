@@ -20,6 +20,7 @@ import {
 import {
   readJSONFile,
   lookupMovieByProperty,
+  lookupMovieByProperty2,
   writeJSONFile,
   searchArrayOfObjects,
 } from "./util/fileHelpers.js";
@@ -34,7 +35,6 @@ const app = express();
 const PORT = Constants.API_PORT;
 const __dirname = path.resolve();
 
-app.use(express.static(path.join(__dirname, "/dist/frontend")));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use((req, res, next) => {
@@ -45,9 +45,12 @@ app.use((req, res, next) => {
   );
   next();
 });
+app.use(express.static(path.join(__dirname, "/dist/frontend")));
 
-app.route("/").get((req, res) => {
-  res.sendFile("/index.html");
+// =========================================================================================
+// ============================= SERVERS FRONTEND BUILD FOLDER =============================
+app.get(!"/api/*", (req, res) => {
+  res.sendFile("index.html", { root: path.join(__dirname, "/dist/frontend") });
 });
 
 app.route("/api/test").get((req, res) => {
@@ -79,13 +82,19 @@ app.route("/api/test").get((req, res) => {
   // });
 });
 
+/** Retrieve data from movie_data.json with POST Body of filenames passed as array
+ *  in object with key 'movieFiles'
+ */
 app.post("/api/movie-data", logRequest, async (req, res) => {
   // Expecting req.body to be {movieFiles: ['movieFileName', '...', 'movieFileName']}
-  const data = req.body.movieFiles;
+  let data = req.body.movieFiles;
+  if (!Array.isArray(data)) {
+    data = [data];
+  }
 
   // ATTEMPT TO MATCH ALL MOVIES FROM REQ BODY TO movie_data.json OBJ's
   try {
-    const localMatchedData = await lookupMovieByProperty("title", data, true);
+    const localMatchedData = await lookupMovieByProperty2("title", data, true);
     // console.log("\nlocalMatchedData\n", localMatchedData);
     res.send(localMatchedData);
   } catch (err) {
@@ -200,13 +209,8 @@ app
 
         // Attempt to get data for each fileNotFound & write to movie_data.json
         notFound.forEach(async (nf) => {
-          const extData = await getMovieData(nf.fileName);
-          await writeNewMovieData(extData);
-
-          var counter = 0;
-          setTimeout(() => {
-            counter += 1;
-          }, 1000);
+          const externalData = await getMovieData(nf.fileName);
+          await writeNewMovieData(externalData);
         });
       } catch (err) {
         handleError();
@@ -237,6 +241,12 @@ app
       return;
     }
   });
+
+app.route("/api/image/:imagePath").get(logRequest, (req, res) => {
+  const iPath = req.params.imagePath;
+
+  res.sendFile(path.join(iPath));
+});
 
 // ========================================================================================
 // ==================================== VIDEO STREAMER ====================================

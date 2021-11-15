@@ -22,6 +22,7 @@ export const newSessionPath = `${Constants.API_ENDPOINT}/new-session`;
 export const allSessionsPath = `${Constants.API_ENDPOINT}/all-sessions-data`;
 export const sessionDataPath = `${Constants.API_ENDPOINT}/session-data`;
 export const movieDataPath = `${Constants.API_ENDPOINT}/movie-data`;
+export const imageFilePath = `${Constants.API_ENDPOINT}/image`;
 
 @Injectable({
   providedIn: 'root',
@@ -29,12 +30,20 @@ export const movieDataPath = `${Constants.API_ENDPOINT}/movie-data`;
 export class PathfinderService {
   constructor(private http: HttpClient) {}
 
-  getMovieData(moviesToMatch: string[]) {
+  getMovieData(moviesToMatch: string[] | string) {
     const sendData = { movieFiles: moviesToMatch };
+
     return this.http
       .post(movieDataPath, sendData)
       .pipe(catchError(this.handleError));
   }
+
+  // getImageFile(imagesToMatch: string[]) {
+  //   const sendData = { imageFiles: imagesToMatch };
+  //   return this.http
+  //     .post(imageFilePath, sendData)
+  //     .pipe(catchError(this.handleError));
+  // }
 
   getSessionData(sessionName: string): Observable<SessionsInterface> {
     return this.http

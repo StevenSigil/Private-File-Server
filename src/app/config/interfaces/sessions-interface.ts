@@ -9,6 +9,31 @@ export interface SessionsInterface {
   sessionName: string;
   type: string;
   updated: Date | string;
+  movieData?: MovieDataInterface[];
+  imageData?: ImageDataInterface[];
+}
+
+export interface MovieDataInterface {
+  title: string;
+  description?: string;
+  poster?: {
+    type?: string;
+    url?: string;
+    width?: number;
+    height?: number;
+  };
+  wikiID?: number | string;
+  id: string;
+  matchedSearchTerms?: string[];
+  originalSearchValue?: string;
+  matchScore?: number;
+  probableMatch?: number;
+}
+
+export interface ImageDataInterface {
+  title: string;
+  fileName: string;
+  url: string;
 }
 
 export interface MasterSessionsInterface {

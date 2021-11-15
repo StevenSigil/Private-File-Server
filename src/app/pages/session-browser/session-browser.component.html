@@ -9,55 +9,135 @@
     <h2>{{ sessionData.sessionName }}</h2>
   </div>
 
-  <div class="movies section">
+  <div
+    class="movies section"
+    *ngIf="sessionData.movieData && sessionData.movieData.length > 0"
+  >
     <div class="subHead">
       <h4>Movies</h4>
     </div>
 
     <div class="content" id="movieContent">
       <div class="singleData" *ngFor="let data of sessionData.movieData">
-        <div class="head" *ngIf="data.poster">
-          <a (click)="joinPathAndNavigate(sessionData.directoryPath, data.fileName)">
+        <div class="header" *ngIf="data.poster">
+          <a
+            (click)="
+              joinPathAndNavigate(sessionData.directoryPath, data.fileName)
+            "
+          >
             <img
               [src]="data.poster.url"
               [width]="data.poster.width"
               [height]="data.poster.height"
+              loading="lazy"
           /></a>
         </div>
 
         <div class="body">
-          <h5>{{ data.title }}</h5>
-          <p>{{ data.description }}</p>
+          <div class="ltText">
+            <h5>{{ data.title }}</h5>
+            <p>{{ data.description }}</p>
+          </div>
+
+          <button
+            class="btn infoBtn"
+            (click)="setAndToggleMatchPopOver(data, true)"
+            *ngIf="data.probableMatch && data.probableMatch < 0.9"
+          >
+            i
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ============================================================== -->
-  <!-- ======================== Session Data ======================== -->
-  <!-- <div
-    class="sessionDataOuter"
-    [classList]="
-      this.showSessionsData
-        ? 'sessionDataOuter slideFromRight'
-        : 'sessionDataOuter slideFromLeft'
-    "
-  >
-    <div class="head">
-      <button (click)="toggleSessionsData()" class="btn btn-outline-light">
-        X
-      </button>
-      <h4>Session info.</h4>
+  <div class="images section" *ngIf="sessionData.imageData.length > 0">
+    <div class="subHead">
+      <h4>Images</h4>
     </div>
-    <div class="body">
-      <dl *ngFor="let datum of objectKeys(sessionData); let i = index">
-        <dt>{{ datum }}:</dt>
-        <dl>{{ sessionData[datum] }}</dl>
-      </dl>
+
+    <div class="content" id="imageContent">
+      <div class="singleData" *ngFor="let iData of sessionData.imageData">
+        <div class="header" *ngIf="iData.url">
+          <a (click)="toggleImageViewer(iData)">
+            <img [src]="iData.url" loading="lazy" />
+          </a>
+        </div>
+
+        <div class="body">
+          <h5>{{ iData.title }}</h5>
+        </div>
+      </div>
     </div>
-  </div> -->
+  </div>
 </div>
+
+<!-- Match Info Popover -->
+<div class="matchInfo popOver" *ngIf="showMatchInfo">
+  <div class="header">
+    <h6>Info</h6>
+    <button
+      class="btn closeBtn"
+      (click)="setAndToggleMatchPopOver(undefined, false)"
+    >
+      X
+    </button>
+  </div>
+  <p>
+    There is only a
+    <span>{{
+      matchInfoClickData && matchInfoClickData.probableMatch
+        ? matchInfoClickData.probableMatch * 100 + '%'
+        : '100%'
+    }}</span>
+    this is the movie represented on your drive based on searching the local
+    movie database.
+  </p>
+  <p>Original term used to search:</p>
+  <p>
+    <span>
+      {{
+        matchInfoClickData && matchInfoClickData.originalSearchValue
+          ? matchInfoClickData.originalSearchValue
+          : 'test'
+      }}
+    </span>
+  </p>
+</div>
+
+<!-- ============================================================== -->
+<!-- ======================== Session Data ======================== -->
+<!-- <div
+  class="sessionDataOuter"
+  [classList]="
+    this.showSessionsData
+      ? 'sessionDataOuter slideFromRight'
+      : 'sessionDataOuter slideFromLeft'
+  "
+>
+  <div class="head">
+    <button (click)="toggleSessionsData()" class="btn">X</button>
+    <h4>Session info.</h4>
+  </div>
+  <div class="body">
+    <dl *ngFor="let datum of objectKeys(sessionData); let i = index">
+      <dt>{{ datum }}:</dt>
+      <dl>{{ sessionData[datum] }}</dl>
+    </dl>
+  </div>
+</div> -->
+
+<!-- </div> -->
 
 <!-- ============================================================= -->
 <!-- ====================== LOADING OVERLAY ====================== -->
 <app-loading [showing]="!sessionData ? true : false"></app-loading>
+
+<!-- ============================================================= -->
+<app-image-viewer
+  [imageData]="imageViewerData"
+  [show]="showImgViewer"
+  [toggleImageViewer]="toggleImageViewer"
+>
+  <!-- *ngIf="imageViewerData !== undefined && showImgViewer" -->
+</app-image-viewer>

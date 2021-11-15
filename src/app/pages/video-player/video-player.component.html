@@ -1,5 +1,27 @@
-<div class="container text-center">
-  <video controls width="720" height="405" id="mainVideo">
-    <source *ngIf="videoReady" src="{{ videoFilePath }}" />
-  </video>
+<div class="subHead">
+  <button class="btn back" (click)="back()">Back</button>
+</div>
+
+<div class="main">
+  <div class="pageData" *ngIf="movieData !== undefined">
+    <h2>
+      {{ movieData.title }}
+    </h2>
+    <p>
+      {{ movieData.description }}
+    </p>
+  </div>
+
+  <div class="mainContainer">
+    <video
+      *ngIf="videoReady && movieData"
+      width="720"
+      height="405"
+      id="mainVideo"
+      controls
+      [poster]="movieData.poster.url"
+    >
+      <source src="{{ videoSrcPath }}" />
+    </video>
+  </div>
 </div>

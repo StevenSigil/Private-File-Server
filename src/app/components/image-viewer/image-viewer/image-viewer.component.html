@@ -1,0 +1,15 @@
+<div class="imageViewer" *ngIf="imageData !== undefined && show">
+  <div class="head">
+    <h3>
+      {{ imageData.title }}
+    </h3>
+
+    <button class="btn closeBtn" (click)="toggleImageViewer(undefined, false)">
+      X
+    </button>
+  </div>
+
+  <div class="body">
+    <img [src]="imageData.url" />
+  </div>
+</div>

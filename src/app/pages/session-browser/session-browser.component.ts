@@ -2,21 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 
 import {
+  ImageDataInterface,
+  MovieDataInterface,
   SessionErrorInterface,
   SessionsInterface,
 } from 'src/app/config/interfaces/sessions-interface';
-import { PathfinderService } from 'src/app/services/pathfinder.service';
-import { normalizeFromCamel } from 'src/app/util/text';
-
-// page loads => use url session name to get session data (api) =>
-//  found => check type of session =>
-//    "movies" => filter files by file extension to get video files => ...
-
-//    Attempt to match with movies in data/movie_data.json =>                           <-- YOU ARE HERE!!!
-
-//      Matches => render || NO_MATCH => attempt to retrieve from api>externalQuery(ie: wiki) =>
-//        SUCCESS => Update data/movie_data.json with new data => next... =>
-//          ALL COMPLETED => Re-render video file data
+import {
+  imageFilePath,
+  PathfinderService,
+} from 'src/app/services/pathfinder.service';
+import { normalizeFileName, normalizeFromCamel } from 'src/app/util/text';
 
 //VIDEO FILE EXTENSIONS: WEBM, .MPG, .MP2, .MPEG, .MPE, .MPV, .OGG, .MP4, .M4P, .M4V, .AVI, .WMV, .MOV, .QT, .FLV, .SWF, AVCHD
 
@@ -30,8 +25,14 @@ export class SessionBrowserComponent implements OnInit {
   sessionData: SessionsInterface | SessionErrorInterface | any;
   showSessionsData: boolean = false;
 
+  matchInfoClickData: ImageDataInterface | MovieDataInterface | any;
+  showMatchInfo: boolean = false;
+
+  imageViewerData: ImageDataInterface | undefined;
+  showImgViewer: boolean = false;
+
   normalizeFromCamel = normalizeFromCamel;
-  objectKeys = Object.keys;
+  // objectKeys = Object.keys;
 
   constructor(
     private route: ActivatedRoute,
@@ -42,6 +43,24 @@ export class SessionBrowserComponent implements OnInit {
   ngOnInit(): void {
     this.sessionFromURL();
   }
+
+  setAndToggleMatchPopOver(
+    data?: ImageDataInterface | MovieDataInterface,
+    show?: boolean
+  ): void {
+    this.matchInfoClickData = data;
+    this.showMatchInfo = show ? show : !this.showMatchInfo;
+  }
+
+  toggleImageViewer = (
+    viewerData?: ImageDataInterface | undefined,
+    show?: boolean
+  ): void => {
+    this.imageViewerData = viewerData ? viewerData : undefined;
+    this.showImgViewer = show ? show : !this.showImgViewer;
+
+    console.log(show, this.showImgViewer);
+  };
 
   sessionFromURL() {
     return this.route.params
@@ -69,6 +88,7 @@ export class SessionBrowserComponent implements OnInit {
         },
         () => {
           console.log('HTTP request complete\n');
+          this.getImageFiles(this.sessionData.directoryContent.files);
         }
       );
     }
@@ -82,7 +102,7 @@ export class SessionBrowserComponent implements OnInit {
 
   checkForVideoFiles(files: string[]) {
     const videoFormats = [
-      'WEBM',
+      '.WEBM',
       '.MPG',
       '.MP2',
       '.MPEG',
@@ -98,7 +118,7 @@ export class SessionBrowserComponent implements OnInit {
       '.QT',
       '.FLV',
       '.SWF',
-      'AVCHD',
+      '.AVCHD',
     ];
 
     const videoFiles: string[] = [];
@@ -122,24 +142,84 @@ export class SessionBrowserComponent implements OnInit {
   getVideoFileDetails(files: string[]) {
     // Get videoFiles from directory
     const videoFiles = this.checkForVideoFiles(files);
+
     // make api request to retrieve movie info from local doc - movie_data.json
     this.pathFinderService.getMovieData(videoFiles).subscribe(
       (res) => {
-        console.log('getVideoFileDetails RESPONSE:\n\t', res);
-
-        // Add video files to "sessionData"
+        // Add video file data to "sessionData"
         this.sessionData.movieData = res;
+        console.log('getVideoFileDetails RESPONSE:\n\t', res);
       },
       (err) => console.warn('getVideoFileDetails ERROR:\n', err),
-      () => console.log('getVideoFileDetails FINAL:\tHTTP Request Complete')
+      () => null // console.log('getVideoFileDetails FINAL:\tHTTP Request Complete')
     );
+  }
+
+  getImageFiles(files: string[]) {
+    const imageFiles = this.checkForImageFiles(files);
+    const data: object[] | undefined = [];
+
+    // cleanup filename to use as display name
+    imageFiles.forEach((file, i, imageFiles) => {
+      setTimeout(() => {
+        const newName = normalizeFileName(file);
+        var pathToImgFile = this.sessionData.directoryPath + '\\' + file;
+        pathToImgFile = pathToImgFile.replace(/\\+|\/+/g, '%5C');
+
+        data.push({
+          title: newName,
+          fileName: file,
+          url: imageFilePath + `/${pathToImgFile}`,
+        });
+      }, i * 150);
+    });
+
+    // Add image file data to sessionData
+    this.sessionData.imageData = data;
+    console.log(data);
+  }
+
+  checkForImageFiles(files: string[]) {
+    const imageFormats = [
+      '.JPG',
+      '.PNG',
+      '.GIF',
+      '.WEBP',
+      '.TIFF',
+      '.PSD',
+      '.RAW',
+      '.BMP',
+      '.HEIF',
+      '.INDD',
+      '.JPEG 2000',
+      '.SVG',
+    ];
+
+    const imageFiles: string[] = [];
+    files.forEach((file) => {
+      // Get file extension
+      let ext = '';
+      const m = file.match(/\.(\w|\d)+$/gi);
+
+      if (m) {
+        // match extension to list of video formats & if matched, return filename
+        ext = m[0];
+        if (imageFormats.some((f) => f.toUpperCase() == ext.toUpperCase())) {
+          imageFiles.push(file);
+          return;
+        }
+      } else return;
+    });
+    console.log('IMAGE FILES:', imageFiles);
+    return imageFiles;
   }
 
   joinPathAndNavigate(destPath: string, endFile: string) {
     const fullPath = /(\\\\|\\|\/)$/.test(destPath)
       ? destPath + endFile
       : destPath + `\\${endFile}`;
-    this.router.navigate(['player', fullPath]);
+    this.router.navigate(['session', this.urlSession, 'video', fullPath]);
+    //
   }
 }
 

@@ -1,7 +1,29 @@
 $color-lightest: #ffffff;
 $color-green: rgba(50, 255, 50, 0.8);
+$color-red: rgb(114, 12, 12);
 $color-darkest: rgba(0, 0, 0, 1);
 $border-radius--card-btn: calc(0.25rem + 8px);
+
+@mixin customScrollBars() {
+  /* width */
+  ::-webkit-scrollbar {
+    width: 14px;
+    border-radius: 6px;
+    border-top: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+  }
+  // /* Track */
+  ::-webkit-scrollbar-track {
+    background: inherit;
+  }
+  // /* Handle */
+  ::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    border-left: 1px solid #ffffff;
+    border-right: 1px solid #ffffff;
+    background: transparentize($color: #ffffff, $amount: 0.8);
+  }
+}
 
 @mixin blackCard($bg-color: #ffffff) {
   border-radius: calc(0.25rem + 10px);
