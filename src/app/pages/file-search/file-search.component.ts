@@ -52,7 +52,7 @@ export class FileSearchComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.pathForm.value.path = 'C:/Users/Steve/Desktop/css_test'; // DELETE ME
+    this.pathForm.value.path = 'D:/' || 'C:/Users/Steve/Desktop/css_test'; // DELETE ME
     this.getFiles(); // DELETE ME
 
     this.sessionForm.get('sessionType')?.disable(); // Delete when more options

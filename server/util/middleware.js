@@ -4,9 +4,12 @@ import util from "util";
 import { throwError } from "rxjs";
 import axios from "axios";
 
-import { readJSONFile, writeJSONFile } from "./fileHelpers.js";
-
-import { getUUID, normalizeFileName } from "./util.js";
+import {
+  readJSONFile,
+  writeJSONFile,
+  lookupMovieByProperty2,
+} from "./fileHelpers.js";
+import { checkForVideoFiles, getUUID, normalizeFileName } from "./util.js";
 import Constants from "../constants.js";
 
 const readDir = util.promisify(fs.readdir);
@@ -136,45 +139,142 @@ export async function getDirectoryContent(req, res, next) {
   }
 }
 
-export async function getMovieData(title) {
-  // https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription&titles=shaun%20of%20the%20dead&redirects=1&piprop=thumbnail%7Cname%7Coriginal&pilicense=any
+export async function createMovieFileData(sessionFiles) {
+  const videoFiles = checkForVideoFiles(sessionFiles);
 
+  // // ========================================================================
+  // // ================================= TODO =================================
+  // // TODO: if (videoFiles.length < 1) ADD ALERT TO RESPONSE SAYING NOT FOUND!
+
+  // Check if each movie is already stored in movie_data.json
   try {
-    const fTitle = normalizeFileName(title);
+    const localMatchMovies = await lookupMovieByProperty2(
+      "title",
+      videoFiles,
+      true
+    );
 
-    const data = await axios.get("https://en.wikipedia.org/w/api.php", {
-      params: {
-        action: "query",
-        format: "json",
-        prop: "pageimages|description",
-        titles: fTitle,
-        redirects: 1,
-        piprop: "thumbnail|name|original",
-        pilicense: "any",
-      },
+    // console.log("\n\n==================================================");
+    // console.log("localMatchMovies\n", localMatchMovies, "\n");
+
+    // Separate the not found videoFiles with >= 70% probability
+    const notFound = localMatchMovies.filter((obj) => {
+      if (obj.error && obj.originalSearchValue) {
+        return true;
+      } else {
+        if (obj.probableMatch && obj.probableMatch >= 0.7) {
+          return false;
+        }
+        if (!obj.probableMatch) {
+          return false;
+        }
+        return true;
+      }
     });
-    const rData = data.data;
+    // console.log("\n\n==================================================");
+    // console.log("notFoundMovies\n", notFound, "\n");
 
-    if (rData.warnings || rData.errors) {
-      console.log(
-        "\n\nPROBLEM FROM EXTERNAL API!!!\n",
-        rData.errors || rData.warnings,
-        "\n"
-      );
+    // Attempt to get data for each fileNotFound & write to movie_data.json
+    const allVideoData = [];
+
+    for (let file of notFound) {
+      file = file.originalSearchValue;
+
+      try {
+        const videoData = await getMovieData(file, true);
+        allVideoData.push(videoData);
+      } catch (err) {
+        throw err;
+      }
     }
 
-    const d = Object.values(rData.query.pages)[0];
+    // console.log("\n\n====================================================");
+    // console.log("ALL VIDEO DATA\n", allVideoData, "\n");
+
+    if (allVideoData.length > 0) {
+      try {
+        return await writeNewMovieData(allVideoData);
+      } catch (err) {
+        throw err;
+      }
+    }
+    return { data: "No new files found in list of files..." };
+  } catch (err) {
+    throw err;
+  }
+}
+
+/**
+ * Attempts to query Wikipedia (external) for a single page matching `searchTitle`
+ * @param {string} searchTitle String to search query Wikipedia's (external) API
+ * @returns Data with `Title`, `Page Image`, `Page Description`, etc... - OR - `Error`
+ */
+async function getFromWikipedia(searchTitle) {
+  let resData = async () => {
+    try {
+      const res = await axios.get("https://en.wikipedia.org/w/api.php", {
+        params: {
+          action: "query",
+          format: "json",
+          prop: "pageimages|description",
+          generator: "search",
+          piprop: "thumbnail|name|original",
+          pilicense: "any",
+          gsrsearch: searchTitle,
+          gsrlimit: "1",
+          gsrsort: "relevance",
+        },
+      });
+
+      return res.data;
+    } catch (err) {
+      throw await err;
+    }
+  };
+  return await resData();
+}
+
+/**
+ * Attempt to retrieve movie data from external search API(s)
+ * @param {string} title string to attempt retrieval of data from external API
+ * @returns `MovieDataInterface` object to send to frontend or ready to write to main file
+ */
+export async function getMovieData(title) {
+  const fTitle = normalizeFileName(title);
+  console.log(`ATTEMPTING TO GET DATA WITH SEARCH TERM "${fTitle}"\n`);
+
+  try {
+    const translatedData = await getFromWikipedia(fTitle);
+    let translatedValues = Object.values(translatedData.query.pages)[0];
+
+    if (!translatedValues.original) {
+      try {
+        translatedValues = await getFromWikipedia(fTitle + " film");
+        translatedValues = Object.values(translatedValues.query.pages)[0];
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    console.log("\n\n========================================================");
+    console.log("DATA FROM WIKIPEDIA\n", translatedValues);
+
     const retData = {
-      title: d.title,
-      description: d.description,
+      title: translatedValues.title,
+      description: translatedValues.description,
       poster: {
         type: "external",
-        url: d.original.source,
-        width: d.original.width,
-        height: d.original.height,
+        url: translatedValues.original.source,
+        width: translatedValues.original.width,
+        height: translatedValues.original.height,
       },
-      wikiID: d.pageid,
+      wikiID: translatedValues.pageid,
+      matchedSearchTerms: [], // [fTitle, title],
+      id: getUUID(),
     };
+
+    retData.matchedSearchTerms.push(fTitle);
+    retData.matchedSearchTerms.push(title);
 
     return retData;
   } catch (err) {
@@ -182,51 +282,71 @@ export async function getMovieData(title) {
   }
 }
 
+/**
+ * Adds a new `MovieDataInterface` instance to `movie_data.json` - Assumes **checking for uniqueness** has already been handled if desired!
+ * @param {object[] | object} data The data to write to `movie_data.json` file.
+ * @returns `SuccessObject` || `Error`
+ */
 export async function writeNewMovieData(data) {
   const movieFilePath = Constants.PathToMovieData;
+  let movieFile = []; // Contents of "movie_data.json"
 
-  // Get contents of "movie_data.json"
-  let movieFile = {};
   try {
     movieFile = await readJSONFile(movieFilePath);
+
+    if (movieFile.length > 0) {
+      let wData = data;
+
+      // console.log("\n\nwDATA:\n", wData, "\n");
+
+      function checkForIDAndSet(obj) {
+        if (!Object.keys(obj).some((d) => d == "id")) {
+          obj.id = getUUID();
+        }
+        return obj;
+      }
+
+      // Check and set "id" for movie if not found in data
+      if (Array.isArray(wData)) {
+        wData = wData.map((wd) => {
+          wd = checkForIDAndSet(wd);
+          return wd;
+        });
+        wData.forEach((datum) => movieFile.push(datum));
+      } else {
+        wData = checkForIDAndSet(wData);
+        movieFile.push(wData);
+      }
+
+      // console.log("\n\n====================================");
+      // console.log(movieFile);
+      // console.log("====================================\n\n");
+
+      // Write data back to movie file
+      try {
+        const updatedMovieFile = await writeJSONFile(movieFilePath, movieFile);
+        return updatedMovieFile;
+      } catch (err) {
+        throw err;
+      }
+    } else {
+      throw new Error(
+        "\n\nERROR: CANNOT FIND MOVIE FILE!...\nUNABLE TO WRITE TO movie_data.json!"
+      );
+    }
   } catch (err) {
     throw err;
   }
-
-  if (movieFile && movieFile.movie_data) {
-    const wData = data;
-
-    // Check and set "id" for movie if not found in data
-    if (!Object.keys(wData).some((d) => d == "id")) {
-      wData.id = getUUID();
-    }
-
-    movieFile.movie_data.push(wData);
-
-    // Re-Write data to movie file
-    try {
-      const updatedMovieFile = await writeJSONFile(movieFilePath, movieFile);
-      return updatedMovieFile;
-    } catch (err) {
-      throw err;
-    }
-  } else {
-    throw new Error(
-      "\n\nERROR: CANNOT FIND movie_data OBJECT IN movieFile!\nUNABLE TO WRITE TO movie_data.json!"
-    );
-  }
 }
 
-// =====================================
-
-// =====================================
-
-// =====================================
-// =====================================
-// =====================================
-// =====================================
-// =====================================
-// =====================================
+// ==========================================================================================
+// ==========================================================================================
+// ==========================================================================================
+// ==========================================================================================
+// ==========================================================================================
+// ==========================================================================================
+// ==========================================================================================
+// ==========================================================================================
 
 export function handleError(res, err, errMes = null, code = null) {
   const jsonError = {};

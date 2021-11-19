@@ -1,35 +1,27 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
-import fsPromises from "fs/promises";
-import Constants from "./constants.js";
+// import fsPromises from "fs/promises";
 
-import pyRunner from "./util/runPy.js";
+import Constants from "./constants.js";
+import { getUUID } from "./util/util.js";
 import {
-  getMovieData,
-  getDirectoryContent,
-  handleError,
-  logRequest,
-  writeNewMovieData,
-} from "./util/middleware.js";
-import {
-  checkPathExists,
   checkUniqueSessionName,
   updateSessionsMaster,
 } from "./util/pathHelpers.js";
 import {
+  createMovieFileData,
+  getDirectoryContent,
+  handleError,
+  logRequest,
+} from "./util/middleware.js";
+import {
   readJSONFile,
-  lookupMovieByProperty,
   lookupMovieByProperty2,
-  writeJSONFile,
   searchArrayOfObjects,
 } from "./util/fileHelpers.js";
-import { checkForVideoFiles, getUUID } from "./util/util.js";
-import { throwError } from "rxjs";
 
-// API to search for page and get main image and description of page
-//    https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages%7Cdescription&titles=shaun%20of%20the%20dead&redirects=1&pilimit=750&pilicense=any
-//      prop: cirrusbuilddoc.opening_text USE FOR DESCRIPTIONS?
+// import pyRunner from "./util/runPy.js";
 
 const app = express();
 const PORT = Constants.API_PORT;
@@ -52,6 +44,7 @@ app.use(express.static(path.join(__dirname, "/dist/frontend")));
 app.get(!"/api/*", (req, res) => {
   res.sendFile("index.html", { root: path.join(__dirname, "/dist/frontend") });
 });
+// =========================================================================================
 
 app.route("/api/test").get((req, res) => {
   // const mime = {
@@ -163,7 +156,7 @@ app
 app
   .route("/api/new-session")
   .post(logRequest, getDirectoryContent, async (req, res) => {
-    console.log("Attempting to create a new SESSION...");
+    console.log("\nAttempting to create a new SESSION...\n");
 
     // Expecting req.body = {filename: fileName, type: fileType,}
     const sessionName = req.body.sessionName || req.body.session_name;
@@ -190,30 +183,11 @@ app
 
     // Attempt to get information from external API for movie files not in local File
     if (/movie/gi.test(sessionType)) {
-      const videoFiles = checkForVideoFiles(files);
-
-      // ========================================================================
-      // ================================= TODO =================================
-      // TODO: if (videoFiles.length < 1) ADD ALERT TO RESPONSE SAYING NOT FOUND!
-
-      // Check if each movie is already stored in movie_data.json
       try {
-        const localMatchMovies = await lookupMovieByProperty(
-          "title",
-          videoFiles,
-          true
-        );
-
-        // Separate the not found videoFiles
-        const notFound = localMatchMovies.filter((obj) => obj.error);
-
-        // Attempt to get data for each fileNotFound & write to movie_data.json
-        notFound.forEach(async (nf) => {
-          const externalData = await getMovieData(nf.fileName);
-          await writeNewMovieData(externalData);
-        });
+        const mFD = await createMovieFileData(files);
+        console.log(mFD.data);
       } catch (err) {
-        handleError();
+        handleError(res, err);
         return;
       }
     }
@@ -233,9 +207,10 @@ app
     try {
       // Name is unique => continue to write data to MASTER sessions file
       const writeMasterRes = await updateSessionsMaster(data);
+      console.log(writeMasterRes);
 
-      res.json(writeMasterRes);
       console.log("Session created successfully!");
+      res.json(data);
     } catch (err) {
       handleError(res, err);
       return;
@@ -291,21 +266,21 @@ app.route("/api/video/:videoPath").get(logRequest, async (req, res, next) => {
 // ========================================================================================
 // ========================================================================================
 
-app.route("/api/directory").get(logRequest, (req, res) => {
-  const query = req.query ? req.query.path : undefined;
-  console.log(`QUERY: ${query}`);
+// app.route("/api/directory").get(logRequest, (req, res) => {
+//   const query = req.query ? req.query.path : undefined;
+//   console.log(`QUERY: ${query}`);
 
-  if (query) {
-    pyRunner
-      .runPy("main.py", query)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        res.status(404).send(err);
-      });
-  }
-});
+//   if (query) {
+//     pyRunner
+//       .runPy("main.py", query)
+//       .then((result) => {
+//         res.send(result);
+//       })
+//       .catch((err) => {
+//         res.status(404).send(err);
+//       });
+//   }
+// });
 
 app.listen(PORT, () =>
   console.log(`SERVER STARTED...\nListening: http://localhost:${PORT}`)

@@ -13,15 +13,19 @@ export function normalizeFileName(str = String) {
 
   ret = ret
     .replace(/\B[A-Z](?=[a-z])/g, (l) => " " + l.toLowerCase()) // Replace camel case for lowercase + space before
-    .replace(/([^(\w|\d|\s|\'|\,)])/g, " ") //                     Replace special (char + space || special char) with space - except ' or ,
-    .replace(/(\'|\,)/g, "") //                                    Replace ' or , with none
+    .replace(/[^a-z|\d|\s|\']/gi, " ") //                          Replace special char with space - except "hyphen"
+    .replace(/\'/g, "") //                                         Replace "hyphen" with none
     .replace(/(\B[A-Z])/g, (l) => l.toLowerCase()) //              Lowercase letters after word start
-    .replace(/^\w/g, (l) => l.toUpperCase()) //                   Capitalize first letter in string
-    .trim();
+    .replace(/^\w/g, (l) => l.toUpperCase()); //                   Capitalize first letter in string
 
-  if (/\b(\s|)the$/gi.test(ret)) {
-    ret = "The " + ret.replace(/\b(\s|)the$/gi, "");
+  // .replace(/\.\w+$/g, '').replace(/\B[A-Z](?=[a-z])/g, (l) => " " + l.toLowerCase()).replace(/[^a-z|\d|\s|\']/gi, " ").replace(/\'/g, "").replace(/(\B[A-Z])/g, (l) => l.toLowerCase()).replace(/^\w/g, (l) => l.toUpperCase()).replace(/\s+/g, ' ').trim();
+
+  // If "the" is not at the beginning of the string, switch it to the beginning
+  if (/\bthe\b(?=.+|$)/gi.test(ret)) {
+    ret = "The " + ret.replace(/\bthe\b(?=.+|$)/gi, "");
   }
+
+  ret = ret.replace(/\s+/g, " ").trim(); //                                       Replace multiple spaces with a single space
 
   return ret;
 }
@@ -66,7 +70,10 @@ export function checkForVideoFiles(files = []) {
 }
 
 export function cloneObject(obj) {
-  if (obj === null) throw new Error("object is null");
+  if (obj === null) {
+    console.error(new Error("object is null\n"));
+    return;
+  }
   if (typeof obj != "object") return obj;
 
   // console.log('\x1b[36m%s\x1b[0m', '\CLONE-OBJECT!:\n', obj);
@@ -79,7 +86,7 @@ export function cloneObject(obj) {
   }
 
   // Arrays
-  if (obj instanceof Array) {
+  if (obj instanceof Array || Array.isArray(obj)) {
     let copy = [];
     obj.forEach((x, i) => (copy[i] = cloneObject(obj[i])));
     return copy;

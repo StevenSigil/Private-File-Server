@@ -1,4 +1,3 @@
-import e from "cors";
 import { readFile, writeFile } from "fs/promises";
 import Constants from "../constants.js";
 import { cloneObject, normalizeFileName } from "./util.js";
@@ -37,54 +36,69 @@ export async function writeJSONFile(path, writeData, encoding = "utf8") {
 /**
  * Returns the found objects from the *array* matching *value* to *prop*
  *
- * TRANSFORMS SHOULD BE DONE BEFORE CALLING FUNCTION.
+ * TRANSFORMS TO `value` SHOULD BE DONE BEFORE CALLING FUNCTION.
+ * If `transformProp` is true, it will use the `normalizeFileName()` function to transform the value of `prop`
  */
 export function searchArrayOfObjects(
   value,
   prop,
   array = [],
   exactVal = false,
-  throwErr = true
+  throwErr = true,
+  transformProp = false
 ) {
-  console.log(`(searchArrayOfObjects): Searching for\t${value}`);
+  console.log(`(searchArrayOfObjects): Searching for\t\t${value}`);
 
   const foundObjs = [];
 
   if (exactVal) {
-    array.filter((obj) => {
-      if (obj[prop] === value) {
-        foundObjs.push(obj);
+    for (const obj of array) {
+      if (Array.isArray(obj[prop])) {
+        // Value of property is an Array
+
+        obj[prop].forEach((propVal) => {
+          propVal = transformProp ? normalizeFileName(propVal) : propVal;
+
+          // console.log("VAL", propVal == value);
+          if (propVal == value) {
+            foundObjs.push(obj);
+            return;
+          }
+        });
+      } else {
+        // Value of property is NOT an Array
+
+        let propVal = transformProp ? normalizeFileName(obj[prop]) : obj[prop];
+
+        if (propVal == value) {
+          foundObjs.push(obj);
+          break;
+        }
       }
-    });
+    }
 
     //
   } else {
     array.forEach((obj) => {
-      if (typeof obj[prop] == "string") {
-        const propVal = obj[prop]
-          .replace(/[^\w\s]/gi, "")
-          .replace("_", " ")
-          .toLowerCase();
+      let propVal = obj[prop];
+
+      if (typeof propVal == "string") {
+        propVal = transformProp ? normalizeFileName(propVal) : propVal;
 
         if (RegExp(`${value}`, "gi").test(propVal)) {
           foundObjs.push(obj);
         }
+        return;
       }
 
-      // If value of "prop" is an array...
-      if (Array.isArray(obj[prop]) || typeof obj[prop] == "object") {
-        const objArrVal = obj[prop];
+      // Value of property is an Array
+      if (Array.isArray(propVal) || typeof propVal == "object") {
+        const objArrVal = propVal;
 
+        // console.log("\n\nV (92):", prop, objArrVal, "\n", obj);
         const foundValsInArr = objArrVal.filter((v) => {
-          const formattedObjVal = v
-            .replace(/[^\w\s]/gi, "")
-            .replace("_", " ")
-            .toLowerCase();
-
-          const formattedVal = value
-            .replace(/[^\w\s]/gi, "")
-            .replace("_", " ")
-            .toLowerCase();
+          const formattedObjVal = transformProp ? normalizeFileName(v) : v;
+          const formattedVal = value;
 
           const valueInPropertyVal = new RegExp(`${formattedVal}`, "gi").test(
             formattedObjVal
@@ -99,6 +113,7 @@ export function searchArrayOfObjects(
         if (foundValsInArr.length > 0) {
           foundObjs.push(obj);
         }
+        return;
       }
     });
   }
@@ -133,129 +148,140 @@ export async function lookupMovieByProperty2(
   // TODO: Make sure the frontend is displaying movies in sessionData even if they aren't return here!
 
   const movieFilePath = Constants.PathToMovieData;
-  let movieFile = {};
+  let movieData = {};
 
-  const movieFileFunc = async () => {
-    try {
-      return readJSONFile(movieFilePath);
-    } catch (err) {
-      throw err;
-    }
-  };
+  try {
+    const movieFileFunc = await readJSONFile(movieFilePath);
+    movieData = cloneObject(movieFileFunc);
+  } catch (err) {
+    throw err;
+  } finally {
+    if (multiple && Array.isArray(valsToMatch)) {
+      const finalMatches = [];
 
-  movieFile = await movieFileFunc();
-  const movieData = cloneObject(movieFile);
+      for (const valToMatch of valsToMatch) {
+        console.log("\nORIGINAL VALUE TO MATCH:\t", valToMatch);
 
-  if (multiple && Array.isArray(valsToMatch)) {
-    const finalMatches = [];
-    valsToMatch.forEach((valToMatch) => {
-      console.log("\nORIGINAL VALUE TO MATCH:", valToMatch);
+        const tempObj = {};
+        tempObj.originalSearchValue = valToMatch;
 
-      const tempObj = {};
-      tempObj.originalSearchValue = String(valToMatch);
+        // ========================= 1.
+        // Try to find with original search term (ie: filename) in already matched terms
+        const foundData0 = searchArrayOfObjects(
+          valToMatch,
+          "matchedSearchTerms",
+          movieData,
+          true,
+          false,
+          false
+        );
 
-      // ========================= 1.
-      // Try to find with original search term (ie: filename) in already matched terms
-      const foundData0 = searchArrayOfObjects(
-        valToMatch,
-        "matchedSearchTerms",
-        movieData,
-        false,
-        false
-      );
+        // Check if it was found then add to main-single object or continue
+        if (Array.isArray(foundData0)) {
+          const singleReturnMatch = {
+            ...foundData0[0],
+            ...tempObj,
+          };
 
-      // Check if it was found then add to main-single object or continue
-      if (Array.isArray(foundData0)) {
-        const singleReturnMatch = {
-          ...foundData0[0],
-          ...tempObj,
-        };
-
-        finalMatches.push(singleReturnMatch);
-        return;
-      }
-      //
-
-      // ========================= 2.
-      // Try to find unknowns (from above) with cleaner value in already matched terms
-
-      let newValToMatch = valToMatch; // clean the valueToMatch
-      if (/\..+$/.test(newValToMatch)) {
-        newValToMatch = valToMatch.match(/.+(?=\..+)/gi)[0]; // Get rid of file extension
-      }
-      const cleanedVal = newValToMatch
-        .replace(/[^\w\s]/g, "")
-        .replace(/\_|\-/g, " ")
-        .toLowerCase();
-
-      // Try to find 'matchValue' in known "matchedSearchTerms" on object
-      const foundData1 = searchArrayOfObjects(
-        cleanedVal,
-        "matchedSearchTerms",
-        movieData,
-        false,
-        false
-      );
-
-      // Separate found data from not-found
-      if (Array.isArray(foundData1) && foundData1.length == 1) {
-        const singleReturnMatch2 = {
-          ...foundData1[0],
-          ...tempObj,
-        };
-        finalMatches.push(singleReturnMatch2);
-        return;
+          finalMatches.push(singleReturnMatch);
+          console.log("\nMATCHED FIRST TIME!\t", valToMatch, "\n");
+          continue;
+        }
         //
-      }
-      //
 
-      // ========================= 3.
-      // Use array of matches in found data to searchByScore with "property" vs. cleanedTerm
-      if (Array.isArray(foundData1) && foundData1.length > 1) {
-        const foundData2 = searchWithScore(
-          property,
+        // ========================= 2.
+        // Try to find unknowns (from above) with cleaner value in already matched terms
+        const cleanedVal = normalizeFileName(valToMatch);
+
+        // Try to find 'matchValue' in known "matchedSearchTerms" on object
+        const foundData1 = searchArrayOfObjects(
+          cleanedVal,
+          "matchedSearchTerms",
+          movieData,
+          false,
+          false,
+          true
+        );
+
+        // Separate found data from not-found
+        if (Array.isArray(foundData1) && foundData1.length == 1) {
+          const singleReturnMatch2 = {
+            ...foundData1[0],
+            ...tempObj,
+          };
+          finalMatches.push(singleReturnMatch2);
+          console.log("\nMATCHED SECOND TIME!\t", valToMatch, "\n");
+          continue;
+          //
+        }
+        //
+
+        // ========================= 3.
+        // Use array of matches in found data to searchByScore with "property" vs. cleanedTerm
+        if (Array.isArray(foundData1) && foundData1.length > 1) {
+          const foundData2 = await searchWithScore(
+            property,
+            [cleanedVal],
+            movieData,
+            Constants.PathToMovieData
+          );
+
+          if (foundData2[0].probableMatch > 0.65) {
+            const singleReturnMatch3 = {
+              ...foundData2[0],
+              ...tempObj,
+            };
+
+            finalMatches.push(singleReturnMatch3);
+            console.log("\nMATCHED THIRD TIME (VIA SCORE)!\t", valToMatch);
+            continue;
+          }
+        }
+        //
+
+        // ========================= 4.
+        // Search term not found -> Use cleaned value to searchByScore with title vs. cleanedTerm
+        const foundData3 = await searchWithScore(
+          "title",
           [cleanedVal],
           movieData,
           Constants.PathToMovieData
         );
 
-        if (foundData2[0].probableMatch > 0.65) {
-          const singleReturnMatch3 = {
-            ...foundData2[0],
+        if (Array.isArray(foundData3) && foundData3[0].probableMatch > 0.65) {
+          const singleReturnMatch4 = {
+            ...foundData3[0],
             ...tempObj,
           };
 
-          finalMatches.push(singleReturnMatch3);
-          return;
+          finalMatches.push(singleReturnMatch4);
+          console.log("\nMATCHED FOURTH TIME (VIA SCORE)!\t", "\n");
+          continue;
+        } else {
+          // COULD NOT FIND! Return "tempObj" with original searchID and Err msg.
+          tempObj.error = `Could not find movie from filename "${valToMatch}"`;
+          finalMatches.push(tempObj);
+          console.log(
+            "COULD NOT MATCH WITH KNOWN FILES!\t",
+            valToMatch,
+            "\n",
+            finalMatches,
+            "\n"
+          );
+          continue;
         }
       }
-      //
 
-      // ========================= 4.
-      // Search term not found -> Use cleaned value to searchByScore with title vs. cleanedTerm
-      const foundData3 = searchWithScore(
-        "title",
-        [cleanedVal],
-        movieData,
-        Constants.PathToMovieData
-      );
+      // console.log("\n\n==================================================");
+      // console.log("finalMatches\n", finalMatches);
+      // console.log("==================================================\n\n");
 
-      if (Array.isArray(foundData3) && foundData3.length > 0) {
-        const singleReturnMatch4 = {
-          ...foundData3[0],
-          ...tempObj,
-        };
-
-        finalMatches.push(singleReturnMatch4);
-        return;
-      }
-    });
-
-    return finalMatches;
-  } else {
-    // If matchValue is not in array, put in array and do again...
-    const matchArr = [valsToMatch];
-    return lookupMovieByProperty2(property, matchArr, true);
+      return finalMatches;
+    } else {
+      // If matchValue is not in array, put in array and do again...
+      const matchArr = [valsToMatch];
+      return lookupMovieByProperty2(property, matchArr, true);
+    }
   }
 }
 
@@ -270,7 +296,12 @@ export async function lookupMovieByProperty2(
  * @param {sting | undefined} writeFilePath Path of original file to update with Key: `matchedSearchTerms`
  * @returns Array of objects matching `valueMatch` @ `property` in `array`
  */
-function searchWithScore(property, valueMatch, array, writeFilePath = null) {
+async function searchWithScore(
+  property,
+  valueMatch,
+  array,
+  writeFilePath = null
+) {
   if (!array) {
     throw new Error("ARRAY IS NOT DEFINED!");
   }
@@ -293,7 +324,8 @@ function searchWithScore(property, valueMatch, array, writeFilePath = null) {
         property,
         array,
         false,
-        false
+        false,
+        true
       );
 
       // If any results are found --> Assign score of likeliness of matching
@@ -370,22 +402,23 @@ function searchWithScore(property, valueMatch, array, writeFilePath = null) {
     });
 
     // Write
-    writeJSONFile(writeFilePath, writeData)
-      .then(() => {
-        return foundData;
-      })
-      .catch((e) => {
-        throw e;
-      });
+    try {
+      await writeJSONFile(writeFilePath, writeData);
+    } catch (err) {
+      throw err;
+    } finally {
+      return foundData;
+    }
+
     // try {
     //   await writeJSONFile(writeFilePath, writeData);
     // } catch (err) {
     //   throw err;
     // }
+  } else {
+    // Return array of matching movie_data objects
+    return foundData;
   }
-
-  // Return array of matching movie_data objects
-  return foundData;
 }
 
 // =========================================================================================
