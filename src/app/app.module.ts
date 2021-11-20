@@ -14,6 +14,8 @@ import { SubmitModalComponent } from './components/modals/submit-modal/submit-mo
 import { SessionBrowserComponent } from './pages/session-browser/session-browser.component';
 import { LoadingComponent } from './components/loading/loading.component';
 import { ImageViewerComponent } from './components/image-viewer/image-viewer/image-viewer.component';
+import { MovieCardComponent } from './components/cards/movie-card/movie-card.component';
+import { ImageCardComponent } from './components/cards/image-card/image-card.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +28,8 @@ import { ImageViewerComponent } from './components/image-viewer/image-viewer/ima
     SessionBrowserComponent,
     LoadingComponent,
     ImageViewerComponent,
+    MovieCardComponent,
+    ImageCardComponent,
   ],
   imports: [
     BrowserModule,

@@ -4,20 +4,20 @@ import util from "util";
 import { throwError } from "rxjs";
 import axios from "axios";
 
+import Constants from "../constants.js";
+import { checkForVideoFiles, getUUID, normalizeFileName } from "./util.js";
+import { getFromWikipedia } from "./externalAPI.js";
 import {
   readJSONFile,
   writeJSONFile,
   lookupMovieByProperty2,
 } from "./fileHelpers.js";
-import { checkForVideoFiles, getUUID, normalizeFileName } from "./util.js";
-import Constants from "../constants.js";
 
 const readDir = util.promisify(fs.readdir);
 const lStat = util.promisify(fs.lstat);
-const __dirname = path.resolve();
 
 /**
- * @description Middleware function to get directory from a given path provided in request query "path" params
+ * Middleware function to get directory from a given path provided in request query `path` params
  *
  * @returns {Response}  Response.directory_content: string[]
  */
@@ -205,36 +205,6 @@ export async function createMovieFileData(sessionFiles) {
 }
 
 /**
- * Attempts to query Wikipedia (external) for a single page matching `searchTitle`
- * @param {string} searchTitle String to search query Wikipedia's (external) API
- * @returns Data with `Title`, `Page Image`, `Page Description`, etc... - OR - `Error`
- */
-async function getFromWikipedia(searchTitle) {
-  let resData = async () => {
-    try {
-      const res = await axios.get("https://en.wikipedia.org/w/api.php", {
-        params: {
-          action: "query",
-          format: "json",
-          prop: "pageimages|description",
-          generator: "search",
-          piprop: "thumbnail|name|original",
-          pilicense: "any",
-          gsrsearch: searchTitle,
-          gsrlimit: "1",
-          gsrsort: "relevance",
-        },
-      });
-
-      return res.data;
-    } catch (err) {
-      throw await err;
-    }
-  };
-  return await resData();
-}
-
-/**
  * Attempt to retrieve movie data from external search API(s)
  * @param {string} title string to attempt retrieval of data from external API
  * @returns `MovieDataInterface` object to send to frontend or ready to write to main file
@@ -339,15 +309,6 @@ export async function writeNewMovieData(data) {
   }
 }
 
-// ==========================================================================================
-// ==========================================================================================
-// ==========================================================================================
-// ==========================================================================================
-// ==========================================================================================
-// ==========================================================================================
-// ==========================================================================================
-// ==========================================================================================
-
 export function handleError(res, err, errMes = null, code = null) {
   const jsonError = {};
   const m =
@@ -403,13 +364,13 @@ export function logRequest(req, res, next) {
   next();
 }
 
-function nameValueObj(d = Object, t = String) {
+function nameValueObj(obj = Object, typeVal = String) {
   const returnList = [];
 
-  for (let k of Object.keys(d)) {
-    const tempObj = { name: k, value: d[k] };
+  for (let k of Object.keys(obj)) {
+    const tempObj = { name: k, value: obj[k] };
 
-    if (t) tempObj.type = t;
+    if (typeVal) tempObj.type = typeVal;
 
     returnList.push(tempObj);
   }

@@ -1,3 +1,4 @@
+import Constants from "../constants.js";
 import { v4 as uuidv4 } from "uuid";
 
 export function getUUID() {
@@ -24,40 +25,28 @@ export function normalizeFileName(str = String) {
   if (/\bthe\b(?=.+|$)/gi.test(ret)) {
     ret = "The " + ret.replace(/\bthe\b(?=.+|$)/gi, "");
   }
-
-  ret = ret.replace(/\s+/g, " ").trim(); //                                       Replace multiple spaces with a single space
+  ret = ret.replace(/\s+/g, " ").trim(); //                        Replace multiple spaces with a single space
 
   return ret;
 }
 
+/** **********************************************************************************************
+ * Finds all files from an array of file names with an extension that matches a video format.
+ * 
+ * @param {string[]} files List of file names
+ * @returns Array of files from `files` that have the extension matching a video format.
+ */
 export function checkForVideoFiles(files = []) {
-  const videoFormats = [
-    "WEBM",
-    ".MPG",
-    ".MP2",
-    ".MPEG",
-    ".MPE",
-    ".MPV",
-    ".OGG",
-    ".MP4",
-    ".M4P",
-    ".M4V",
-    ".AVI",
-    ".WMV",
-    ".MOV",
-    ".QT",
-    ".FLV",
-    ".SWF",
-    "AVCHD",
-  ];
-
+  const videoFormats = Constants.formats.videoFormats;
   const videoFiles = [];
+
   files.forEach((file) => {
-    // Get file extension
+    // Find file extension
     let ext = "";
     const m = file.match(/\.(\w|\d)+$/gi);
+
+    // match extension to list of video formats & if matched, return filename
     if (m) {
-      // match extension to list of video formats & if matched, return filename
       ext = m[0];
       if (videoFormats.some((f) => f.toUpperCase() == ext.toUpperCase())) {
         videoFiles.push(file);

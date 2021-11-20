@@ -14,69 +14,87 @@
     *ngIf="sessionData.movieData && sessionData.movieData.length > 0"
   >
     <div class="subHead">
-      <h4>Movies</h4>
+      <button
+        *ngFor="let tab of availableTabs"
+        (click)="switchTab(tab)"
+        [ngClass]="tab == viewingTab ? 'btn' : 'btnNotSelected btn'"
+      >
+        {{ tab }}
+      </button>
     </div>
 
-    <div class="content" id="movieContent">
-      <div class="singleData" *ngFor="let data of sessionData.movieData">
-        <div class="header" *ngIf="data.poster">
-          <a
-            (click)="
-              joinPathAndNavigate(
-                sessionData.directoryPath,
-                data.originalSearchValue
-              )
-            "
-          >
-            <img
-              [src]="data.poster.url"
-              [width]="data.poster.width"
-              [height]="data.poster.height"
-              loading="lazy"
-          /></a>
-        </div>
+    <!-- ================================================================= -->
+    <!-- ======================= MOVIES ACTIVE TAB ======================= -->
+    <div class="VScrollArea" *ngIf="viewingTab == 'Movies'">
+      <div class="singleData col-2" *ngFor="let data of sessionData.movieData">
+        <app-movie-card
+          [movieData]="data"
+          [sessionData]="sessionData"
+          [urlSession]="urlSession"
+        ></app-movie-card>
 
-        <div class="body">
-          <div class="ltText">
-            <h5>{{ data.title }}</h5>
-            <p>{{ data.description }}</p>
-          </div>
-
-          <button
-            class="btn infoBtn"
-            (click)="setAndToggleMatchPopOver(data, true)"
-            *ngIf="data.probableMatch && data.probableMatch < 0.9"
-          >
-            i
+        <div class="bottomOptions">
+          <button class="" (click)="setAndToggleInfoSelection(data)">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="50" fill="white" />
+            </svg>
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="50" fill="white" />
+            </svg>
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="50" fill="white" />
+            </svg>
           </button>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="images section" *ngIf="sessionData.imageData.length > 0">
-    <div class="subHead">
-      <h4>Images</h4>
-    </div>
-
-    <div class="content" id="imageContent">
-      <div class="singleData" *ngFor="let iData of sessionData.imageData">
-        <div class="header" *ngIf="iData.url">
-          <a (click)="toggleImageViewer(iData)">
-            <img [src]="iData.url" loading="lazy" />
-          </a>
-        </div>
-
-        <div class="body">
-          <h5>{{ iData.title }}</h5>
-        </div>
+    <!-- ================================================================= -->
+    <!-- ======================= IMAGES ACTIVE TAB ======================= -->
+    <div class="VScrollArea" *ngIf="viewingTab == 'Images'">
+      <div class="singleData col-2" *ngFor="let data of sessionData.imageData">
+        <app-image-card
+          [imageData]="data"
+          [sessionData]="sessionData"
+          [urlSession]="urlSession"
+        ></app-image-card>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ================================================================= -->
+<!-- =========================== INFO POPUP ========================== -->
+<div class="movieInfo" *ngIf="infoSelected">
+  <div class="header">
+    <h3>Info</h3>
+
+    <button
+      class="closeBtn"
+      (click)="setAndToggleInfoSelection(undefined)"
+    >
+      X
+    </button>
+  </div>
+
+  <div class="body">
+    <dl *ngFor="let obj of infoSelected" class="dataRow">
+      <dt>
+        {{ normalizeFromCamel(obj.name) }}
+      </dt>
+      <dd>
+        {{ obj.value }}
+      </dd>
+    </dl>
+  </div>
+
+  <div class="footer">
+    <button class="btn editInfoBtn">Edit this</button>
+  </div>
+</div>
+
 <!-- Match Info Popover -->
-<div class="matchInfo popOver" *ngIf="showMatchInfo">
+<!-- <div class="matchInfo popOver" *ngIf="showMatchInfo">
   <div class="header">
     <h6>Info</h6>
     <button
@@ -106,7 +124,7 @@
       }}
     </span>
   </p>
-</div>
+</div> -->
 
 <!-- ============================================================== -->
 <!-- ======================== Session Data ======================== -->
@@ -137,10 +155,9 @@
 <app-loading [showing]="!sessionData ? true : false"></app-loading>
 
 <!-- ============================================================= -->
-<app-image-viewer
+<!-- <app-image-viewer
   [imageData]="imageViewerData"
   [show]="showImgViewer"
   [toggleImageViewer]="toggleImageViewer"
 >
-  <!-- *ngIf="imageViewerData !== undefined && showImgViewer" -->
-</app-image-viewer>
+</app-image-viewer> -->

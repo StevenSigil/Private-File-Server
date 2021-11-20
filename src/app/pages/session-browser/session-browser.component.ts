@@ -13,7 +13,10 @@ import {
 } from 'src/app/services/pathfinder.service';
 import { normalizeFileName, normalizeFromCamel } from 'src/app/util/text';
 
-//VIDEO FILE EXTENSIONS: WEBM, .MPG, .MP2, .MPEG, .MPE, .MPV, .OGG, .MP4, .M4P, .M4V, .AVI, .WMV, .MOV, .QT, .FLV, .SWF, AVCHD
+export interface transformedMovieInterface {
+  name: string;
+  value: any;
+}
 
 @Component({
   selector: 'app-session-browser',
@@ -31,17 +34,60 @@ export class SessionBrowserComponent implements OnInit {
   imageViewerData: ImageDataInterface | undefined;
   showImgViewer: boolean = false;
 
+  viewingTab: string = 'Movies';
+  availableTabs: string[] = [];
+
+  infoSelected: transformedMovieInterface[] | undefined;
+
   normalizeFromCamel = normalizeFromCamel;
-  // objectKeys = Object.keys;
+  objectKeys = Object.keys;
 
   constructor(
     private route: ActivatedRoute,
-    private pathFinderService: PathfinderService,
-    private router: Router
+    private pathFinderService: PathfinderService // private router: Router
   ) {}
 
   ngOnInit(): void {
     this.sessionFromURL();
+  }
+
+  nameValueObj(obj: any, typeVal: any | undefined) {
+    const returnList = [];
+
+    for (let k of Object.keys(obj)) {
+      let val = obj[k];
+
+      if (val instanceof Object && !Array.isArray(val)) {
+        const subObj = this.nameValueObj(val, undefined);
+        subObj.forEach((o) => returnList.push(o));
+        //
+      } else {
+        val = /.\,./g.test(val) ? val.toString().replace(/(.)\,(.)/g, '$1, $2') : val;
+        console.log('VAL', val);
+
+        const tempObj = typeVal
+          ? { name: k, value: val, type: typeVal }
+          : { name: k, value: val };
+
+        returnList.push(tempObj);
+      }
+    }
+    return returnList;
+  }
+
+  setAndToggleInfoSelection(fileData: MovieDataInterface | undefined) {
+    if (fileData !== undefined) {
+      const idx = this.sessionData.movieData.findIndex(
+        (d: MovieDataInterface) => d.id == fileData.id
+      );
+      this.infoSelected = this.nameValueObj(
+        this.sessionData.movieData[idx],
+        undefined
+      );
+    } else {
+      this.infoSelected = fileData;
+    }
+    console.log(this.infoSelected);
   }
 
   setAndToggleMatchPopOver(
@@ -71,6 +117,14 @@ export class SessionBrowserComponent implements OnInit {
       .unsubscribe();
   }
 
+  addTabToAvailableTabs(tabName: string): void {
+    this.availableTabs.push(tabName);
+  }
+  switchTab(tabToSwitch: string): void {
+    this.viewingTab = tabToSwitch;
+    console.log('VIEWING TAB\t', this.viewingTab);
+  }
+
   getSession() {
     if (this.urlSession !== undefined) {
       return this.pathFinderService.getSessionData(this.urlSession).subscribe(
@@ -81,6 +135,8 @@ export class SessionBrowserComponent implements OnInit {
           // If session.type is "movies" -> Get movie data
           if (/movie/gi.test(this.sessionData.type)) {
             this.getVideoFileDetails(this.sessionData.directoryContent.files);
+            this.viewingTab = 'Movies';
+            this.addTabToAvailableTabs('Movies');
           }
         },
         (err: SessionErrorInterface) => {
@@ -176,7 +232,10 @@ export class SessionBrowserComponent implements OnInit {
 
     // Add image file data to sessionData
     this.sessionData.imageData = data;
-    console.log(data);
+
+    if (imageFiles.length > 0) {
+      this.addTabToAvailableTabs('Images');
+    }
   }
 
   checkForImageFiles(files: string[]) {
@@ -214,13 +273,13 @@ export class SessionBrowserComponent implements OnInit {
     return imageFiles;
   }
 
-  joinPathAndNavigate(destPath: string, endFile: string) {
-    const fullPath = /(\\\\|\\|\/)$/.test(destPath)
-      ? destPath + endFile
-      : destPath + `\\${endFile}`;
-    this.router.navigate(['session', this.urlSession, 'video', fullPath]);
-    //
-  }
+  // joinPathAndNavigate(destPath: string, endFile: string) {
+  //   const fullPath = /(\\\\|\\|\/)$/.test(destPath)
+  //     ? destPath + endFile
+  //     : destPath + `\\${endFile}`;
+  //   this.router.navigate(['session', this.urlSession, 'video', fullPath]);
+  //   //
+  // }
 }
 
 // USE https://api.tvmaze.com/ FOR TV SHOW QUERY'S

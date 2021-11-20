@@ -3,7 +3,7 @@
 
 .main {
   position: relative;
-  margin-bottom: 250px;
+  // margin-bottom: 250px;
 }
 
 .head {
@@ -25,126 +25,146 @@
 
 .movies,
 .images {
+  width: calc(100% - 4rem);
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  min-height: 100%;
+  position: relative;
+
   .subHead {
     padding: 1rem 1rem 0;
     margin-bottom: 1rem;
-
-    h4 {
-      margin: 0;
-    }
-  }
-  .content {
     display: flex;
     flex-direction: row;
+    flex-wrap: nowrap;
+    border-bottom: 1px solid #fff;
+
+    .btn {
+      @include blackCardBtn();
+      width: auto;
+      margin: 0 10px !important;
+      min-width: 200px !important;
+      border-bottom: none;
+
+      background: linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.8547794117647058) 15%,
+        rgba(255, 255, 255, 1) 30%,
+        rgba(255, 255, 255, 1) 100%
+      );
+    }
+    .btnNotSelected {
+      @include blackCardBtn();
+      @include darkOutlineBtn();
+      width: auto;
+      border-bottom: none;
+      background: none;
+    }
+  }
+  .VScrollArea {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 0;
+    align-items: baseline;
+    justify-content: center;
+    width: 100%;
+    max-height: 100%;
     overflow-x: auto;
-    padding-bottom: 4rem;
+    padding-bottom: 1rem;
 
     .singleData {
+      @include blackCard($color-lightest);
+      // box-shadow: none;
+      // border: none;
       display: flex;
       flex-direction: column;
-      margin: 0 2rem;
-      min-width: 400px;
-      max-width: 401px;
-      justify-content: stretch;
+      margin: 2rem 2rem;
+      min-width: 350px;
+      align-self: stretch;
+      padding: 0 25px;
+      position: relative;
 
-      .header {
-        margin-top: 1rem;
-        height: 300px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        position: relative;
+      .bottomOptions {
+        position: absolute;
+        width: 100%;
+        bottom: 0;
+        left: 0;
+        z-index: 80;
 
-        img {
-          max-height: 300px;
-          max-width: 380px;
-          height: auto;
-          width: auto;
-        }
-      }
+        button {
+          background: none;
+          padding: 0.25rem 1rem 0.5rem;
+          margin: 0;
+          float: right;
+          font-size: 1.2em;
+          font-weight: 700;
 
-      .body {
-        margin-top: 1rem;
-        margin-bottom: 0;
-        max-width: 100%;
-        height: auto;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
+          svg {
+            width: 4px;
+            height: 4px;
+            margin: 0 2px;
+          }
+          circle {
+            fill: white;
+            transition: all 250ms ease-out;
+          }
 
-        .ltText {
-          flex: 1;
-        }
-
-        h5,
-        p {
-          display: -webkit-box;
-          height: fit-content;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          &:hover {
+            circle {
+              fill: lighten(orange, 10%);
+            }
+          }
         }
       }
     }
   }
 }
 
-.infoBtn {
-  border-radius: 50%;
-  height: 35px;
-  width: 35px;
-  aspect-ratio: 1/1;
-  background-color: inherit;
-  color: orange;
-  border: 1px solid rgba(255, 166, 0, 0.9);
-  font-weight: 600;
-  margin-right: 0.5rem;
-  margin-left: 0.5rem;
-  padding: 0;
-  line-height: 0;
-  text-align: center;
-  font-family: 'Courier New', Courier, monospace;
-  position: relative;
-  box-shadow: 0 0 10px 1px orange;
-
-  &:hover {
-    background-color: orange;
-    color: #222222;
-    box-shadow: 0 0 20px lighten(orange, 10%);
-  }
-}
-
-.popOver {
+.movieInfo {
   position: fixed;
-  right: 2.5rem;
-  bottom: 1.5rem;
-  max-width: 400px;
-  padding-bottom: 1rem;
-  display: block;
-  background-color: $color-red;
-  border: 1px solid rgba(255, 166, 0, 0.9);
-  border-radius: 12px;
+  bottom: 20px;
+  right: 20px;
+  max-width: 100vw;
+  width: 450px;
+  max-height: calc(90vh - 20px);
+  height: 100%;
+  min-height: fit-content;
+  overflow-y: auto;
+  z-index: 90;
+
+  background-color: rgba(0, 0, 0, 0.9);
+  // background-image: url('https://www.transparenttextures.com/patterns/green-dust-and-scratches.png');
+  /* This is mostly intended for prototyping; please download the pattern and re-host for production environments. Thank you! */
+
+  border: 1px solid $color-lightest;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
 
   .header {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 0.75rem;
-    border-bottom: 1px solid darken($color: $color-red, $amount: 20%);
-    padding: 1rem 0.75rem 0.5rem;
+    align-items: center;
 
-    h6 {
-      margin: 0;
+    h3 {
+      margin-bottom: 0;
+      width: auto;
     }
-
     .closeBtn {
       background: none;
       padding: 0.25rem 0.75rem;
       color: inherit;
       border: 1px solid transparent;
+      width: auto;
 
       &:hover {
         $darkerColor: darken(
@@ -157,16 +177,75 @@
     }
   }
 
-  span {
-    color: $color-green;
-    font-weight: 600;
-  }
+  .body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    flex: 1;
+    margin: 1rem 0;
 
-  p {
-    margin: 0;
-    padding: 0.5rem 0.75rem;
+    .dataRow {
+      display: flex;
+      flex-direction: row;
+
+      dt {
+        flex: 1;
+        margin: 0 0.5rem;
+      }
+      dd {
+        flex: 2;
+        overflow-wrap: break-word;
+        overflow: hidden;
+      }
+    }
+  }
+  .footer {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 1rem;;
+
+    button {
+      @include darkOutlineBtn();
+      background: #000000;
+      flex: 1;
+      margin: 0;
+
+      &:hover {
+        $darkerColor: darken(
+          $color: $color-lightest,
+          $amount: 20%,
+        );
+        color: $darkerColor;
+        border: 1px solid $darkerColor;
+      }
+    }
   }
 }
+
+// .infoBtn {
+//   border-radius: 50%;
+//   height: 35px;
+//   width: 35px;
+//   aspect-ratio: 1/1;
+//   background-color: inherit;
+//   color: orange;
+//   border: 1px solid rgba(255, 166, 0, 0.9);
+//   font-weight: 600;
+//   margin-right: 0.5rem;
+//   margin-left: 0.5rem;
+//   padding: 0;
+//   line-height: 0;
+//   text-align: center;
+//   font-family: 'Courier New', Courier, monospace;
+//   position: relative;
+//   box-shadow: 0 0 10px 1px orange;
+
+//   &:hover {
+//     background-color: orange;
+//     color: #222222;
+//     box-shadow: 0 0 20px lighten(orange, 10%);
+//   }
+// }
 
 // .sessionDataOuter {
 //   border: 1px solid #fff;

@@ -1,0 +1,66 @@
+<div *ngIf="sessionData && imageData">
+  <a (click)="toggleImageViewer(imageData)">
+    <p class="fileTitle">
+      {{ imageData.fileName }}
+    </p>
+
+    <div class="header" *ngIf="imageData.url">
+      <img [src]="imageData.url" loading="lazy" />
+    </div>
+  </a>
+
+  <div class="body">
+    <div class="ltText">
+      <h5>{{ imageData.title }}</h5>
+      <p>{{ imageData.description }}</p>
+    </div>
+
+    <button
+      class="btn infoBtn"
+      (click)="setAndToggleMatchPopOver(imageData, true)"
+      *ngIf="imageData.probableMatch && imageData.probableMatch < 0.9"
+    >
+      i
+    </button>
+  </div>
+</div>
+
+<app-image-viewer
+  [imageData]="imageViewerData"
+  [show]="showImgViewer"
+  [toggleImageViewer]="toggleImageViewer"
+>
+</app-image-viewer>
+
+<!-- Match Info Popover -->
+<div class="matchInfo popOver" *ngIf="showMatchInfo">
+  <div class="header">
+    <h6>Info</h6>
+    <button
+      class="btn closeBtn"
+      (click)="setAndToggleMatchPopOver(undefined, false)"
+    >
+      X
+    </button>
+  </div>
+  <p>
+    There is only a
+    <span>{{
+      matchInfoClickData && matchInfoClickData.probableMatch
+        ? matchInfoClickData.probableMatch * 100 + '%'
+        : '100%'
+    }}</span>
+    this is the movie represented on your drive based on searching the local
+    movie database.
+  </p>
+  <p>Original term used to search:</p>
+  <p>
+    <span>
+      {{
+        matchInfoClickData && matchInfoClickData.originalSearchValue
+          ? matchInfoClickData.originalSearchValue
+          : 'test'
+      }}
+    </span>
+  </p>
+</div>

@@ -166,7 +166,12 @@ app
     const nowDate = new Date().toLocaleString();
 
     // Middleware already set directory, files, & folders data to res.directory_content
-    const { directory, files, folders } = res.directory_content;
+    let { directory, files, folders } = res.directory_content;
+
+    // if directory ends with a colon, add slash to end for saving properly
+    if (/\:$/.test(directory)) {
+      directory = directory + "\\";
+    }
 
     const data = {
       id: uuid,

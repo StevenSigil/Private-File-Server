@@ -115,13 +115,13 @@ export class FileSearchComponent implements OnInit {
     const sessionName = this.formattedSubmissionName;
     const fileType = this.formattedSubmissionType;
 
-    const reqBody = JSON.stringify({
+    const reqBody = {
       path: directory,
       sessionName: sessionName,
       type: fileType,
-    });
+    };
 
-    this.pathfinderService.createSession(reqBody).subscribe(
+    this.pathfinderService.createSession(JSON.stringify(reqBody)).subscribe(
       (res) => {
         this.isLoading = false;
         this.handleSessionModalReset();
@@ -183,6 +183,8 @@ export class FileSearchComponent implements OnInit {
       .replace(/\s/g, ''); // combine at spaces
     return txt;
   }
+
+  // .replace(/[^\w\d\s]+/g, ' ').replace(/(\b[a-z])/g, (l) => l.toUpperCase()).replace(/(^[\w])/g, (l) => l.toLowerCase()).replace(/\s/g, '')
 
   getFiles(reqPath?: string): void {
     const origPath = this.pathForm.value.path;
